@@ -1,0 +1,21 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<div class="site-footer bgf">
+	<div class="container">
+    	
+        <div class="footer-links clearfix">
+            {include file='library/help.lbi'}
+            <div class="col-contact">
+                <p class="phone">{$service_phone}</p>
+                <p>周一至周日 8:00-18:00<br>儿童家具，就选壹居!</p>
+                <a rel="nofollow" class="btn btn-line-primary btn-small">
+                    <i class="iconfont"></i> 24小时在线客服
+                </a>
+            </div>
+            <div class="cr-code">
+                <p class="codes y ml1" style=""><img src="http://www.yiju.tm/htaerm/default/images/dyh.jpg">订阅壹居</p>
+                <p class="codes y ml1" style=""><img src="http://www.yiju.tm/htaerm/default/images/smlf.png">免费量房</p>
+                <p class="codes y" style=""><img src="http://www.yiju.tm/htaerm/default/images/fwh.jpg">微商城</p>
+            </div>
+        </div>
+    </div>
+</div>

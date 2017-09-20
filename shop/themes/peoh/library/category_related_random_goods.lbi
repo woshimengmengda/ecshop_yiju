@@ -1,0 +1,27 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- {if $category_related_random_goods} -->
+        <h3></h3>
+      <ul class="brick-list random_list clearfix">
+      <!--{foreach from=$category_related_random_goods item=category_related_random_goods_data}-->  
+          <li class="brick-item brick-item-m brick-item-first">
+              <div class="figure figure-img">
+                  <a href="{$category_related_random_goods_data.url}">
+                      <img src="{$category_related_random_goods_data.goods_thumb}" width="160" height="160" alt="{$category_related_random_goods_data.goods_name}">
+                  </a>
+              </div>
+              <h3 class="title">
+                                <a href="{$category_related_random_goods_data.url}">{$category_related_random_goods_data.goods_name}</a>
+                            </h3>
+              <p class="desc">{$category_related_random_goods_data.goods_brief}</p>
+              <p class="price">
+                <!-- {if $category_related_random_goods_data.promote_price neq 0} -->
+        {$category_related_random_goods_data.formated_promote_price}
+        <!-- {else} -->
+        {$category_related_random_goods_data.shop_price}
+        <!-- {/if} --> </p>
+          </li>
+      <!--{/foreach}-->
+      </ul>
+<!-- {/if} -->
+
+

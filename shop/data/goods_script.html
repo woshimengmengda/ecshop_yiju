@@ -1,0 +1,13 @@
+ {foreach from=$goods_list item=goods_item name=foo}
+
+    {foreach from=$goods_item item=goods }
+        <li class="mix {$goods_css} l{$smarty.foreach.foo.iteration}" style="opacity: 0">
+        <a class="img_box" href="{$goods_url}{$goods.goods_id}" target="_blank"><img src="{$url}{$goods.goods_thumb}" alt="{$goods.goods_name}" border="0" ></a>
+        <div class="goods_info">
+        <a class="goods_title" href="{$goods_url}{$goods.goods_id}" target="_blank">{$goods.goods_name}</a>
+        <p class="goods_price">{$goods.goods_price}</p>
+        </div>
+        </li>
+    {/foreach}
+
+  {/foreach}

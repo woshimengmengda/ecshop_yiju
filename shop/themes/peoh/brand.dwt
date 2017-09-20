@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Keywords" content="{$keywords}" />
+<meta name="Description" content="{$description}" />
+<!-- TemplateBeginEditable name="doctitle" -->
+<title>{$page_title}</title>
+<!-- TemplateEndEditable -->
+<!-- TemplateBeginEditable name="head" -->
+<!-- TemplateEndEditable -->
+<link rel="shortcut icon" href="favicon.ico" />
+<link rel="icon" href="animated_favicon.gif" type="image/gif" />
+<link href="{$ecs_css_path}" rel="stylesheet" type="text/css" />
+<link href="category.css" rel="stylesheet" type="text/css" />
+{* 包含脚本文件 *}
+{insert_scripts files='jquery-1.9.1.min.js,jquery.json.js'}
+{insert_scripts files='common.js,global.js,compare.js'}
+</head>
+<body>
+<!-- #BeginLibraryItem "/library/page_header.lbi" --><!-- #EndLibraryItem -->
+<!-- #BeginLibraryItem "/library/ur_here.lbi" --><!-- #EndLibraryItem -->
+<div class="brand-box" >
+  <div class="container">
+        <div class="brand-logo">
+          <!-- {if $brand.brand_logo} -->
+            <img src="data/brandlogo/{$brand.brand_logo}" width="200"/>
+          <!-- {/if} -->
+        </div>
+        <div class="brand-Category">
+          <h3><span>{$brand.brand_name}</span></h3>
+          <!-- {foreach from=$brand_cat_list item=cat} -->
+          <a href="{$cat.url}" class="f6">{$cat.cat_name|escape:html} {if $cat.goods_count}({$cat.goods_count}){/if}</a>
+          <!-- {/foreach} -->
+        </div> 
+  </div>
+</div>
+<div class="content">
+<div id="wrapper" class="container">
+<!-- #BeginLibraryItem "/library/goods_list.lbi" --><!-- #EndLibraryItem -->
+</div>
+</div>
+<!-- #BeginLibraryItem "/library/page_footer.lbi" --> <!-- #EndLibraryItem -->
+</body>
+</html>

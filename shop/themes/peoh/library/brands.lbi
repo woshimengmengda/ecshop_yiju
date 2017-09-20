@@ -1,0 +1,16 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- {if $brand_list} -->
+        <ul class="brand">
+            	<!-- {foreach from=$brand_list item=brand name="brand_foreach"} -->
+                <li>
+                    <a href="{$brand.url}" target="_blank" rel="nofollow">
+                      <!-- {if $brand.brand_logo} -->
+                        <img src="data/brandlogo/{$brand.brand_logo}" />
+                      <!-- {/if} -->
+                    </a>
+                </li>
+                <!-- {/foreach} -->
+                <li class="more"><a href="brand.php" target="_blank" rel="nofollow">更多&gt;</a></li>
+        </ul>
+<!-- {/if} -->
+

@@ -1,0 +1,20 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<div class="blank"></div>
+<div class="col-links-box">
+<!--{if $helps}-->
+    <!-- {foreach from=$helps item=help_cat name=foo} --> 
+    {if $smarty.foreach.foo.iteration < 6}
+    <dl class="col-links">
+      <dt>{$help_cat.cat_name}</dt>
+      <!-- {foreach from=$help_cat.article item=item name=lin} -->
+      {if $smarty.foreach.lin.iteration < 2}<em>></em>{else}<em>/</em>{/if}
+      <dd>
+        <a href="{$item.url}" target="_blank" title="{$item.title|escape:html}" rel="nofollow">{$item.short_title}</a>
+      </dd>
+      <!-- {/foreach} --> 
+    </dl>
+    {/if} 
+    <!-- {/foreach} --> 
+<!--{/if}--> 
+    <dl class="col-links">{$icp_number}</dl>
+</div>

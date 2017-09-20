@@ -1,0 +1,9 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<div id="video" class="us-video">
+      <!--视频一-->
+      <div class="video-item video-list ">
+          <a href="javascript:void(0)" data-video="//www.yiju.tm/us-video.mp4">
+            <img src="images/us-video.jpg" width="234" height="170"><span class="play"><i class="iconfont"></i></span>
+          </a>
+      </div>
+</div>

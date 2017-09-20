@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Keywords" content="{$keywords}" />
+<meta name="Description" content="{$description}" />
+<!-- TemplateBeginEditable name="doctitle" -->
+<title>{$page_title}</title>
+<!-- TemplateEndEditable --><!-- TemplateBeginEditable name="head" --><!-- TemplateEndEditable -->
+<link rel="shortcut icon" href="favicon.ico" />
+<link rel="icon" href="animated_favicon.gif" type="image/gif" />
+<link href="{$ecs_css_path}" rel="stylesheet" type="text/css" />
+<link href="category.css" rel="stylesheet" type="text/css" />
+{* 包含脚本文件 *}
+{insert_scripts files='common.js,lefttime.js'}
+<script type="text/javascript">
+  {foreach from=$lang.js_languages item=item key=key}
+    var {$key} = "{$item}";
+  {/foreach}
+</script>
+</head>
+<body>
+<!-- #BeginLibraryItem "/library/page_header.lbi" --><!-- #EndLibraryItem -->
+
+<div class="breadcrumbs" style="height:auto">
+    <!-- #BeginLibraryItem "/library/goods_fittings.lbi" --><!-- #EndLibraryItem -->
+    <!-- #BeginLibraryItem "/library/goods_article.lbi" --><!-- #EndLibraryItem -->
+    <div class="container pick_list">
+    <a href=".">{$lang.your_choice}</a> <code>&gt;</code>
+    <!--{foreach from = $picks item=pick }-->
+       <a style="margin-left:30px;" href="{$pick.url}">{$pick.name}</a>
+    <!--{/foreach}-->
+    </div>
+</div>
+
+<div class="container">
+  <div class="filter-box">
+      <!--{foreach from=$condition item=caption}-->
+      <div class="filter-list-wrap">
+          <dl class="filter-list clearfix filter-list-row-2">
+              <dt>{$caption.name}：</dt>
+                <!--{foreach from=$caption.cat item=cat}-->
+                <dd class="active">{$cat.cat_name}</dd>
+                  <!--{foreach from = $cat.list item=list}-->
+                  <dd><a href="{$list.url}">{$list.name}</a></dd>
+                  <!--{/foreach}-->
+                <!--{/foreach}-->
+            </dl>
+            <a  href="javascript:;" class="more J_filterToggle">更多<i class="iconfont"></i></a>
+        </div>
+        <!--{/foreach}-->
+    </div>
+</div>
+
+
+
+
+
+<div class="content">
+  <div  class="container">
+  
+  <!--right start-->
+      
+      <h3 class="order-list-box clearfix fw-light"><span>{$lang.search_result} ({$count})</span></h3>
+      <div class="goods-list-box">
+          <div class="goods-list clearfix">
+              <!--{if $count > 5}-->
+              <div class="more f_r" style="clear:both; float:right"><a href="{$url}"><img src="images/more.gif" /></a></div>
+              <!--{/if}-->
+              <!--{foreach from=$pickout_goods item=goods name=goods}-->
+              <div class="goods-item">
+                  <div class="figure figure-img">
+                      <a href="{$goods.url}"><img src="{$goods.thumb}" alt="{$goods.name|escape:html}" class="goodsimg" /></a>
+                  </div>
+                  <p class="desc">{$goods.goods_brief}</p>
+                  <h2 class="title"><a href="{$goods.url}" title="{$goods.name|escape:html}">{$goods.short_name}</a></h2>
+                  <p class="price">
+                    <!--{if $goods.promote_price neq "" } -->
+                    {$lang.promote_price}<font class="shop_s">{$goods.promote_price}</font>
+                    <!--{else}-->
+                    {$lang.shop_prices}<font class="shop_s">{$goods.shop_price}</font>
+                    <!--{/if}-->
+                    <!-- {if $show_marketprice} -->
+                    <del>{$lang.market_prices}<font class="market_s">{$goods.market_price}</font></del>
+                    <!-- {/if} -->
+                  </p>
+                    <div class="actions clearfix">
+                        <a href="javascript:collect({$goods.id});" class="btn-like J_likeGoods"><i class="iconfont"></i><span>{$lang.btn_collect}</span></a> 
+                        <a href="javascript:addToCart({$goods.id})" class="btn-buy J_buyGoods"><span>{$lang.btn_buy}</span> <i class="iconfont"></i></a>
+                   </div>
+                   <div class="flags">
+                
+                    <!--{if $goods.zhekou } -->
+                      <div class="flag flag-saleoff">{$goods.zhekou}折促销</div>
+                  <!--{/if}-->
+                    
+                  </div>
+              </div>
+              <!--{/foreach}-->
+          </div>
+      </div>
+  <!--right end-->
+</div>
+</div>
+
+<!-- #BeginLibraryItem "/library/page_footer.lbi" --> <!-- #EndLibraryItem -->
+</body>
+<script type="text/javascript">
+var gmt_end_time = "{$group_buy.gmt_end_date|default:0}";
+{foreach from=$lang.goods_js item=item key=key}
+var {$key} = "{$item}";
+{/foreach}
+
+var btn_buy = "{$lang.btn_buy}";
+var is_cancel = "{$lang.is_cancel}";
+var select_spe = "{$lang.select_spe}";
+<!-- {literal} -->
+
+onload = function()
+{
+  try
+  {
+    onload_leftTime();
+  }
+  catch (e)
+  {}
+}
+<!-- {/literal} -->
+</script>
+</html>
