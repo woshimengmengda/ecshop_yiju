@@ -4774,7 +4774,7 @@ function get_volume_price_list($goods_id, $price_type = '1')
 
  */
 
-function get_final_price($goods_id, $goods_num = '1', $is_spec_price = false, $spec = array())
+function get_final_price($goods_id, $goods_num = '1', $is_spec_price = false, $spec = array(), $goods_detail = false)
 
 {
 
@@ -4936,7 +4936,13 @@ function get_final_price($goods_id, $goods_num = '1', $is_spec_price = false, $s
 
 
     //返回商品最终购买价格
-    if($goods['dooly_price'] > 0){
+    $sql = "SELECT `cardnumber` ".
+        " FROM " .$GLOBALS['ecs']->table('users'). "".
+        " WHERE `user_id` = '" . $_SESSION['user_id']."'";
+
+    $res = $GLOBALS['db']->getRow($sql);
+    //如果是兜礼会员 并设置了兜礼优惠价 返回兜礼优惠价 by xiaoq
+    if($goods['dooly_price'] > 0 && !$goods_detail && !empty($res['cardnumber'])){
         return $goods['dooly_price'];
     }
     return $final_price;

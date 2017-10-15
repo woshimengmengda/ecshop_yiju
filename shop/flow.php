@@ -902,7 +902,14 @@ elseif ($_REQUEST['step'] == 'checkout')
         }
     }
     $yunqi_payment and array_unshift($payment_list, $yunqi_payment);
-
+    $userInfo = get_user_info();
+    if(empty($userInfo['cardnumber'])){
+        foreach($payment_list as $kk => $vv){
+            if($vv['pay_code'] == 'doolypay'){
+                unset($payment_list[$kk]);
+            }
+        }
+    }
     $smarty->assign('payment_list', $payment_list);
 
     /* 取得包装与贺卡 */

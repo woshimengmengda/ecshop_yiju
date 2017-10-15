@@ -461,6 +461,7 @@ elseif ($action == 'signin')
     {
         update_user_info();  //更新用户信息
         recalculate_price(); // 重新计算购物车中的商品价格
+
         $smarty->assign('user_info', get_user_info());
         $ucdata = empty($user->ucdata)? "" : $user->ucdata;
         $result['ucdata'] = $ucdata;
