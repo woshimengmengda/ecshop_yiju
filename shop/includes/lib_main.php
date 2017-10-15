@@ -118,12 +118,12 @@ function get_user_info($id=0)
         $id = $_SESSION['user_id'];
     }
     $time = date('Y-m-d');
-    $sql  = 'SELECT u.user_id, u.email, u.user_name, u.user_money, u.pay_points'.
+    $sql  = 'SELECT u.user_id, u.email, u.user_name, u.user_money, u.pay_points, u.cardnumber'.
             ' FROM ' .$GLOBALS['ecs']->table('users'). ' AS u ' .
             " WHERE u.user_id = '$id'";
     $user = $GLOBALS['db']->getRow($sql);
     $bonus = get_user_bonus($id);
-
+    $user['cardnumber'] = $user['cardnumber'];
     $user['username']    = $user['user_name'];
     $user['user_points'] = $user['pay_points'] . $GLOBALS['_CFG']['integral_name'];
     $user['user_money']  = price_format($user['user_money'], false);

@@ -2033,6 +2033,14 @@ function get_cart_goods()
         {
             $row['package_goods_list'] = get_package_goods($row['goods_id']);
         }
+        $shop_price = $GLOBALS['db']->getRow("SELECT `shop_price`, `dooly_price` FROM " . $GLOBALS['ecs']->table('goods') . " WHERE `goods_id`='{$row['goods_id']}'");
+
+        $cardnumber = $GLOBALS['db']->getOne("SELECT `cardnumber` FROM " . $GLOBALS['ecs']->table('users') . " WHERE `user_id`='{$_SESSION['user_id']}'");
+
+        if(!empty($cardnumber) && $shop_price['dooly_price']>0){
+            $row['shop_price'] = price_format($shop_price['shop_price']);
+            $row['dooly_discount_price'] = $shop_price['shop_price']-$shop_price['dooly_price'];
+        }
         $goods_list[] = $row;
     }
     $total['goods_amount'] = $total['goods_price'];

@@ -902,6 +902,7 @@ elseif ($_REQUEST['step'] == 'checkout')
         }
     }
     $yunqi_payment and array_unshift($payment_list, $yunqi_payment);
+
     $smarty->assign('payment_list', $payment_list);
 
     /* 取得包装与贺卡 */
@@ -2618,6 +2619,8 @@ else
 
     /* 取得商品列表，计算合计 */
     $cart_goods = get_cart_goods($flow_type);
+//    echo "<pre>";
+//    print_r($cart_goods['goods_list']);exit;
     $smarty->assign('goods_list', $cart_goods['goods_list']);
     $smarty->assign('total', $cart_goods['total']);
 	

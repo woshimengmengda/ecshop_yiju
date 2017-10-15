@@ -88,7 +88,11 @@
                   </div>
                   <!-- {/if} -->
                   <div class="col col-price">
-                    {$goods.goods_price}
+                  <!-- {if $goods.shop_price} -->
+                     <del>{$goods.shop_price}</del>
+                  <!-- {else} -->
+                     {$goods.goods_price}
+                  <!-- {/if} -->
                   </div>
                   <!-- {if $goods.goods_id gt 0 && $goods.is_gift eq 0 && $goods.parent_id eq 0} 普通商品可修改数量 -->
                   <div class="col col-num"> 
@@ -108,6 +112,9 @@
                   		</div><!-- item-row -->
                   	</div>
                 </div>
+                <!-- {if $goods.shop_price} -->
+                     <div style="line-height: 24px;border-radius:12px 0 0 12px;background-color: #EE3F44;width: 156px;color:white;margin-top:-24px;margin-left:489px;">&nbsp&nbsp&nbsp&nbsp兜礼专享价{$goods.goods_price}</div><div style="line-height: 22px;border-radius:0 12px 12px 0;background-color: white;width: 96px;color:#EE3F44;border:1px solid #EE3F44;margin-top:-24px;margin-left:645px;">&nbsp&nbsp&nbsp&nbsp立省{$goods.dooly_discount_price}元</div>
+                <!-- {/if} -->
                 <!-- {/foreach} -->
             </div>
             <p class="clear-cart"> <a id="del-all" href="flow.php?step=clear">清空购物车</a> </p>
@@ -355,7 +362,7 @@ padding: 10px 20px 12px; height:auto; cursor:pointer; border:none;" value="加�
             	<ul class="item-list clearfix payment-list" id="payment-list">
                 	<!-- {foreach from=$payment_list item=payment name=foo} 循环支付方式 --> 
                 	<li>
-                    	<label class="checkout-item" for="payment_{$smarty.foreach.foo.iteration}">{$payment.pay_name}</label>
+                    	<label class="checkout-item" for="payment_{$smarty.foreach.foo.iteration}"><!--{if $payment.pay_code eq doolypay}--><img style="width:20px;height:20px;border-radius: 10px;margin-left:-10px;margin-right:6px;" src="themes/peoh/images/dooly.jpg"><!--{/if}-->{$payment.pay_name}</label>
                     	<input type="radio" name="payment" class="radio" id="payment_{$smarty.foreach.foo.iteration}" value="{$payment.pay_id}" {if $order.pay_id eq $payment.pay_id}checked{/if} isCod="{$payment.is_cod}" onclick="selectPayment(this)" {if $cod_disabled and $payment.is_cod eq "1"}disabled="true"{/if}/>
                         <div class="text">
                         	<i></i>{$lang.pay_fee}：{$payment.format_pay_fee}

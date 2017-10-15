@@ -36,8 +36,15 @@
                     	<div class="user-card">
                             <h2 class="username">{$info.username}</h2>
                             <p class="tip">{$lang.welcome_to} {$info.shop_name} ~</p>
+                            <!--{if $info.cardnumber neq ''} -->
+                            <div style="line-height: 20px;border-radius: 10px;background-color: #EE3F44;width: 116px;color:#FECE00;margin-bottom:8px;"><img src="themes/peoh/images/dooly.jpg" alt="" style="height: 19px;width: 20px;margin-top: -3px;margin-left: 8px;">兜礼VIP会员</div>
+                            <!--{/if} -->
                             <a class="link" href="user.php?act=profile">{$lang.modify}{$lang.profile}></a>
+                            <!--{if $info.cardnumber neq ''} -->
+                            <img class="avatar" src="images/dooly.jpg" />
+                            <!--{else} -->
                             <img class="avatar" src="images/photo.jpg" />
+                            <!--{/if} -->
                         </div>
                         <div class="user-actions">
                         	<ul class="action-list">

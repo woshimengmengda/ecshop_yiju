@@ -4820,7 +4820,7 @@ function get_final_price($goods_id, $goods_num = '1', $is_spec_price = false, $s
 
     /* 取得商品信息 */
 
-    $sql = "SELECT g.promote_price, g.promote_start_date, g.promote_end_date, ".
+    $sql = "SELECT g.promote_price, g.promote_start_date, g.promote_end_date, g.dooly_price, ".
 
                 "IFNULL(mp.user_price, g.shop_price * '" . $_SESSION['discount'] . "') AS shop_price ".
 
@@ -4835,7 +4835,6 @@ function get_final_price($goods_id, $goods_num = '1', $is_spec_price = false, $s
            " AND g.is_delete = 0";
 
     $goods = $GLOBALS['db']->getRow($sql);
-
 
 
     /* 计算商品的促销价格 */
@@ -4937,7 +4936,9 @@ function get_final_price($goods_id, $goods_num = '1', $is_spec_price = false, $s
 
 
     //返回商品最终购买价格
-
+    if($goods['dooly_price'] > 0){
+        return $goods['dooly_price'];
+    }
     return $final_price;
 
 }

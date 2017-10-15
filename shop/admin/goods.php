@@ -182,7 +182,8 @@ elseif ($_REQUEST['act'] == 'add' || $_REQUEST['act'] == 'edit' || $_REQUEST['ac
             'promote_end_date'   => local_date('Y-m-d', local_strtotime('+1 month')),
             'goods_weight'  => 0,
             'give_integral' => -1,
-            'rank_integral' => -1
+            'rank_integral' => -1,
+            'dooly_price' => 0
         );
 
         if ($code != '')
@@ -254,7 +255,8 @@ elseif ($_REQUEST['act'] == 'add' || $_REQUEST['act'] == 'edit' || $_REQUEST['ac
                 'promote_end_date'   => local_date('Y-m-d', gmstr2tome('+1 month')),
                 'goods_weight'  => 0,
                 'give_integral' => -1,
-                'rank_integral' => -1
+                'rank_integral' => -1,
+                'dooly_price' => 0
             );
         }
 
@@ -818,6 +820,7 @@ elseif ($_REQUEST['act'] == 'insert' || $_REQUEST['act'] == 'update')
 
     /* 处理商品数据 */
     $shop_price = !empty($_POST['shop_price']) ? $_POST['shop_price'] : 0;
+    $dooly_price = !empty($_POST['dooly_price']) ? $_POST['dooly_price'] : 0;
     $market_price = !empty($_POST['market_price']) ? $_POST['market_price'] : 0;
     $virtual_sales = !empty($_POST['virtual_sales']) ? $_POST['virtual_sales'] : 0;
     $promote_price = !empty($_POST['promote_price']) ? floatval($_POST['promote_price'] ) : 0;
@@ -854,12 +857,12 @@ elseif ($_REQUEST['act'] == 'insert' || $_REQUEST['act'] == 'update')
         {
 			
             $sql = "INSERT INTO " . $ecs->table('goods') . " (goods_name, goods_name_style, goods_sn, " .
-                    "cat_id, brand_id, shop_price, market_price, virtual_sales, is_promote, promote_price, " .
+                    "cat_id, brand_id, shop_price, dooly_price, market_price, virtual_sales, is_promote, promote_price, " .
                     "promote_start_date, promote_end_date, goods_img, goods_thumb, original_img, keywords, goods_brief, " .
                     "seller_note, goods_weight, goods_number, warn_number, integral, give_integral, is_best, is_new, is_hot, " .
                     "is_on_sale, is_alone_sale, is_shipping, goods_desc, packing_list, customer_service, add_time, last_update, goods_type, rank_integral, suppliers_id,detail_width)" .
                 "VALUES ('$_POST[goods_name]', '$goods_name_style', '$goods_sn', '$catgory_id', " .
-                    "'$brand_id', '$shop_price', '$market_price', '$virtual_sales', '$is_promote','$promote_price', ".
+                    "'$brand_id', '$shop_price', '$dooly_price', '$market_price', '$virtual_sales', '$is_promote','$promote_price', ".
                     "'$promote_start_date', '$promote_end_date', '$goods_img', '$goods_thumb', '$original_img', ".
                     "'$_POST[keywords]', '$_POST[goods_brief]', '$_POST[seller_note]', '$goods_weight', '$goods_number',".
                     " '$warn_number', '$_POST[integral]', '$give_integral', '$is_best', '$is_new', '$is_hot', '$is_on_sale', '$is_alone_sale', $is_shipping, ".
@@ -868,12 +871,12 @@ elseif ($_REQUEST['act'] == 'insert' || $_REQUEST['act'] == 'update')
         else
         {
             $sql = "INSERT INTO " . $ecs->table('goods') . " (goods_name, goods_name_style, goods_sn, " .
-                    "cat_id, brand_id, shop_price, market_price, virtual_sales, is_promote, promote_price, " .
+                    "cat_id, brand_id, shop_price, dooly_price, market_price, virtual_sales, is_promote, promote_price, " .
                     "promote_start_date, promote_end_date, goods_img, goods_thumb, original_img, keywords, goods_brief, " .
                     "seller_note, goods_weight, goods_number, warn_number, integral, give_integral, is_best, is_new, is_hot, is_real, " .
                     "is_on_sale, is_alone_sale, is_shipping, goods_desc, packing_list, customer_service,add_time, last_update, goods_type, extension_code, rank_integral,detail_width)" .
                 "VALUES ('$_POST[goods_name]', '$goods_name_style', '$goods_sn', '$catgory_id', " .
-                    "'$brand_id', '$shop_price', '$market_price', '$virtual_sales', '$is_promote','$promote_price', ".
+                    "'$brand_id', '$shop_price', '$dooly_price', '$market_price', '$virtual_sales', '$is_promote','$promote_price', ".
                     "'$promote_start_date', '$promote_end_date', '$goods_img', '$goods_thumb', '$original_img', ".
                     "'$_POST[keywords]', '$_POST[goods_brief]', '$_POST[seller_note]', '$goods_weight', '$goods_number',".
                     " '$warn_number', '$_POST[integral]', '$give_integral', '$is_best', '$is_new', '$is_hot', 0, '$is_on_sale', '$is_alone_sale', $is_shipping, ".
@@ -905,6 +908,7 @@ elseif ($_REQUEST['act'] == 'insert' || $_REQUEST['act'] == 'update')
                 "cat_id = '$catgory_id', " .
                 "brand_id = '$brand_id', " .
                 "shop_price = '$shop_price', " .
+                "dooly_price = '$dooly_price', " .
                 "market_price = '$market_price', " .
                 "virtual_sales = '$virtual_sales', " .
                 "is_promote = '$is_promote', " .

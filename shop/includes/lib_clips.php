@@ -595,7 +595,7 @@ function get_user_default($user_id)
 {
     $user_bonus = get_user_bonus();
 
-    $sql = "SELECT pay_points, user_money, credit_line, last_login, is_validated, email FROM " .$GLOBALS['ecs']->table('users'). " WHERE user_id = '$user_id'";
+    $sql = "SELECT pay_points, user_money, credit_line, last_login, is_validated, email,cardnumber FROM " .$GLOBALS['ecs']->table('users'). " WHERE user_id = '$user_id'";
     $row = $GLOBALS['db']->getRow($sql);
     $info = array();
     $info['username']  = stripslashes($_SESSION['user_name']);
@@ -628,7 +628,7 @@ function get_user_default($user_id)
             " FROM " .$GLOBALS['ecs']->table('order_info').
             " WHERE user_id = '" .$user_id. "' AND shipping_time > '" .$last_time. "'". order_query_sql('shipped');
     $info['shipped_order'] = $GLOBALS['db']->getAll($sql);
-
+    $info['cardnumber'] = $row['cardnumber']?$row['cardnumber']:'';
     return $info;
 }
 

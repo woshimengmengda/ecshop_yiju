@@ -78,7 +78,7 @@ function reg(str){
                               </span> 
                               
                               <!--{else}--> 
-                              <span>{$lang.shop_price}</span> <span class="unit"> <b class="nala_price red" id="ECS_SHOPPRICE">{$goods.shop_price_formated} </b> </span>  
+                              <span>{$lang.shop_price}</span> <span class="unit"> <b class="nala_price red" id="ECS_SHOPPRICE">{$goods.shop_price_formated} </b> </span>
                               
                                 <!--{if $rank_prices}--> 
                                 <a href="javascript:;" id="membership" data-type="normal" class="membership">高级会员购买享有折扣</a>
@@ -109,10 +109,13 @@ function reg(str){
                         <dd>
                         	
                             <ul>
+                              <!-- {if $dooly_member == 'true'} 登录账号为兜礼会员则显示-->
+                                      <li style="margin-bottom: 26px;margin-top: 26px;"><div style="line-height: 20px;border-radius:10px 0 0 10px;background-color: #EE3F44;width: 166px;color:white;">&nbsp&nbsp&nbsp&nbsp兜礼专享价￥{$goods.dooly_price}</div><div style="line-height: 18px;border-radius:0 10px 10px 0;background-color: white;width: 104px;color:#EE3F44;border:1px solid #EE3F44;margin-top:-20px;margin-left:166px;">&nbsp&nbsp&nbsp&nbsp立省{$dooly_discount_price}元</div></li>
+                              <!-- {/if} -->
                               <!-- {if $goods.is_shipping} 为免运费商品则显示-->
                               <li> <span class="lbl">{$lang.goods_free_shipping}</span> </li>
                               
-                              <!-- {/if} --> 
+                              <!-- {/if} -->
                               <!-- {if $cfg.show_goodssn} 显示商品货号-->
                               <li> <span class="lbl">{$lang.goods_sn}</span> <em>{$goods.goods_sn}</em> </li>
                               

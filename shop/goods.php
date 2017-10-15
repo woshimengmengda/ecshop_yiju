@@ -77,7 +77,7 @@ if (!empty($_REQUEST['act']) && $_REQUEST['act'] == 'getGoodsInfo')
     $res    = array('err_msg' => '', 'result' => '', 'goods_img' => '');
 
     $goods_id  = $_REQUEST['id'];
-	
+
 	if(!empty($goods_id))
 	{
 		 /* 获得商品的信息 */
@@ -180,6 +180,24 @@ if (!empty($_REQUEST['act']) && $_REQUEST['act'] == 'gotopage')
 
 $cache_id = $goods_id . '-' . $_SESSION['user_rank'].'-'.$_CFG['lang'];
 $cache_id = sprintf('%X', crc32($cache_id));
+if($_SESSION['user_id']){
+    $sql = "SELECT cardnumber FROM " . $ecs->table('users') .
+        " WHERE user_id = '$_SESSION[user_id]'";
+    $cardnumber = $db->getOne($sql);
+    $dgoods = get_goods_info($goods_id);
+    $dshop_price = $dgoods['shop_price'];
+    $dooly_price = $dgoods['dooly_price'];
+
+    if($dooly_price <= 0){
+        $dooly_price = $dshop_price;
+    }
+    $dooly_discount_price = $dshop_price-$dooly_price;
+    if(!empty($cardnumber) && $dooly_discount_price > 0){
+        $cache_id='';
+        $smarty->assign('dooly_member',  'true');
+        $smarty->assign('dooly_discount_price',              $dooly_discount_price);
+    }
+}
 if (!$smarty->is_cached('goods.dwt', $cache_id))
 {
     $smarty->assign('image_width',  $_CFG['image_width']);
@@ -212,6 +230,7 @@ if (!$smarty->is_cached('goods.dwt', $cache_id))
         }
 
         $shop_price   = $goods['shop_price'];
+
         $linked_goods = get_linked_goods($goods_id);
 		
         $goods['goods_style_name'] = add_style($goods['goods_name'], $goods['goods_name_style']);
