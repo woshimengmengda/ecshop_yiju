@@ -86,7 +86,8 @@ class doolypay
      */
     function get_code()
     {
-        return '';
+        $button = '<div style="text-align:center"><input type="button" value="立即支付" /></div>';
+        return $button;
     }
 
     /**

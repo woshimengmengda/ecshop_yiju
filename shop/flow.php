@@ -2050,7 +2050,6 @@ elseif ($_REQUEST['step'] == 'done')
     if ($order['order_amount'] > 0)
     {
         $payment = payment_info($order['pay_id']);
-
         include_once('includes/modules/payment/' . $payment['pay_code'] . '.php');
 		
         $pay_obj    = new $payment['pay_code'];
@@ -2082,6 +2081,44 @@ elseif ($_REQUEST['step'] == 'done')
     {
         $order['shipping_name']=trim(stripcslashes($order['shipping_name']));
     }
+    //兜礼未支付订单同步 by xiaoq
+    if($payment['pay_code'] == 'doolypay'){
+        $is_dly = true;
+    }else{
+        $is_dly = false;
+    }
+    $sql_d = "SELECT * FROM " . $ecs->table('order_goods') . " WHERE order_id =" . $order['order_id'];
+    $resd = $db->getAll($sql_d);
+    foreach($resd as $r => $d){
+        $o_detail[$r]['code'] = $d['goods_sn'];
+        $o_detail[$r]['amount'] = $d['goods_price'];
+        $o_detail[$r]['category'] = '0000';
+        $o_detail[$r]['price'] = $d['goods_price'];
+        $o_detail[$r]['tax'] = '0';
+        $o_detail[$r]['goods'] = $d['goods_name'];
+        $o_detail[$r]['number'] = $d['goods_number'];
+    }
+    $d_order = array(
+        "amount" => $order['order_amount'],
+        "price" => $order['order_amount'],
+        "orderDetail"=>$o_detail,
+//        "storesId" => "A001",
+        "orderDate" => date("Y-m-d H:i:s", time()),
+        "orderNumber" => $order['order_sn'],
+        "serialNumber" => $order['log_id'],
+//        "businessId" => "TEST_0d4e9c9ae4f81ee0838797d849c69c361",
+        "type" => $is_dly?'0':'1',
+//        "cardNumber" => "15921213465",
+    );
+    $sql_u = "SELECT cardnumber FROM " . $ecs->table('users') . " WHERE user_id =" . $_SESSION['user_id'];
+    $resu = $db->getOne($sql_u);
+    $d_order['cardNumber'] = $resu?$resu:'';
+    include_once("interface/reachlife.php");
+    $Reachlife = new Reachlife();
+    $resc = $Reachlife->curl('noPayOrdersSynchronization', $d_order);
+//    echo "<pre>";
+//    print_r($resc);exit;
+    //end
 
     /* 订单信息 */
     $smarty->assign('order',      $order);
