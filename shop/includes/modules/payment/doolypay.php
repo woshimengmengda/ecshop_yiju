@@ -92,9 +92,9 @@ class doolypay
     /**
      * 处理函数
      */
-    function response()
+    function respond()
     {
-        return;
+        return '这是兜礼积分支付方式';
     }
 }
 

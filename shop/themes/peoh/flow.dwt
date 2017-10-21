@@ -667,9 +667,83 @@ padding: 10px 20px 12px; height:auto; cursor:pointer; border:none;" value="加�
     
     <!-- {if $pay_online} -->
         <!-- {if $pay_online eq 'doolypay'} -->
-            <input type="text" value='' id="dooly_code">
-            <input type="button" id="dooly_button">
-            <input type="button" id="dooly_pay">
+            <script>
+               function getDoolyCode(cardnumber, order_id){
+                    var cardnumber = cardnumber;
+                    var order_id = order_id;
+                    var code=$("#dooly_code_button");
+                    var validCode = false;
+                    var nums = 120;
+                    Ajax.call('flow.php?step=get_dooly_code', 'cardnumber=' + cardnumber + '&order_id=' +order_id, get_dooly_code_response, 'POST', 'JSON');
+                    function get_dooly_code_response(result)
+                    {
+                      if(result.status == 'succ'){
+                          validCode = true;
+                          if(result.is_pay_pwd == 'true'){
+                              $("#is_pay_pwd").val("true");
+                              $("#doolypay_password").css("display", "block");
+                          }else{
+                              $("#is_pay_pwd").val("false");
+                              $("#doolypay_password").css("display", "none");
+                          }
+                      }else{
+                          $("#err").html(result.msg);
+                      }
+                      if(validCode){
+                          validCode=false;
+                          timer=setInterval(function(){
+                              if(nums>0){
+                                  nums--;
+                                  code.val(nums+"秒后重新发送");
+                                  code.attr("disabled",true);
+                              }else{
+                                  clearInterval(timer);
+                                  nums=120;//重置回去
+                                  validCode=true;
+                                  code.removeAttr("disabled");
+                                  code.val("发送验证码");
+                              }
+                          },1000)
+                      }
+                    }
+               }
+
+               function payDooly(cardnumber, order_id){
+                    var dcode = $("#dooly_code").val();
+                    var ispwd = $("#is_pay_pwd").val();
+                    var dpwd = $("#doolypay_password").val();
+                    if(dcode == ''){
+                        alert("请输入验证码");return;
+                    }
+                    if(ispwd == "true" && dpwd == ''){
+                        alert("请输入支付密码");return;
+                    }
+
+                    var cardnumber = cardnumber;
+                    var order_id = order_id;
+                    Ajax.call('flow.php?step=pay_dooly', 'cardnumber='+cardnumber+'&order_id='+order_id+'&dcode='+dcode+'&dpwd='+dpwd, pay_dooly_response, 'POST', 'JSON');
+                    function pay_dooly_response(result)
+                    {
+                        if(result.status == "succ"){
+                            window.location = "respond.php?code=doolypay&dooly_status=succ";
+                        }else{
+                            window.location = "respond.php?code=doolypay&dooly_status=fail&info="+result.msg;
+                        }
+                    }
+               }
+            </script>
+            <div style="text-align: center;">
+                <input type="text" value='' id="dooly_code" placeholder="请输入兜礼积分验证码" style="height: 30px;border-radius: 4px 4px;border: solid 1px #ccc;">
+                <input type="button" value="获取验证码" onclick="getDoolyCode({$cardNumber}, {$order.order_id})" id="dooly_code_button" style="height: 29px;width: 100px;position: absolute;margin-left: 5px;background-color: cornflowerblue;border-radius: 4px 4px;color: white;">
+                <input type="password" id="doolypay_password" placeholder="请输入兜礼积分支付密码" style="height: 30px;border-radius: 4px 4px;border: solid 1px #ccc;display:none;margin-left:546px;margin-top:5px;">
+                <p id="err" style="color:red;"></p>
+            </div>
+            <div class="section section-payment">
+                <div class="pay_action">
+                    <input type="hidden" value="false" id="is_pay_pwd">
+                    <input type="button" id="dooly_pay" value="立即支付" onclick="payDooly({$cardNumber}, {$order.order_id})" style="margin-left:500px;">
+                </div>
+            </div>
         <!-- {else} -->
             <!-- 如果是线上支付则显示支付按钮 -->
             <div class="section section-payment">

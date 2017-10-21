@@ -86,7 +86,15 @@ else
             include_once($plugin_file);
 
             $payment = new $pay_code();
-            $msg     = (@$payment->respond()) ? $_LANG['pay_success'] : $_LANG['pay_fail'];
+            if($pay_code == "doolypay"){
+                if($_REQUEST['dooly_status'] == 'succ'){
+                    $msg     = $_LANG['pay_success'];
+                }else{
+                    $msg     = $_LANG['pay_fail'].$_REQUEST['info'];
+                }
+            }else{
+                $msg     = (@$payment->respond()) ? $_LANG['pay_success'] : $_LANG['pay_fail'];
+            }
         }
         else
         {

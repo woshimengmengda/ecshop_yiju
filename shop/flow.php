@@ -1893,7 +1893,11 @@ elseif ($_REQUEST['step'] == 'done')
         $parent_id = 0;
     }
     $order['parent_id'] = $parent_id;
-
+    //给订单加上兜礼标识 by xiaoq 2017-10-21
+    $userInfo = get_user_info();
+    if(!empty($userInfo['cardnumber'])){
+        $order['from_dooly'] = 'true';
+    }
     /* 插入订单表 */
     $error_no = 0;
     do
@@ -2081,41 +2085,46 @@ elseif ($_REQUEST['step'] == 'done')
     {
         $order['shipping_name']=trim(stripcslashes($order['shipping_name']));
     }
-    //兜礼未支付订单同步 by xiaoq
-    if($payment['pay_code'] == 'doolypay'){
-        $is_dly = true;
-    }else{
-        $is_dly = false;
-    }
-    $sql_d = "SELECT * FROM " . $ecs->table('order_goods') . " WHERE order_id =" . $order['order_id'];
-    $resd = $db->getAll($sql_d);
-    foreach($resd as $r => $d){
-        $o_detail[$r]['code'] = $d['goods_sn'];
-        $o_detail[$r]['amount'] = $d['goods_price'];
-        $o_detail[$r]['category'] = '0000';
-        $o_detail[$r]['price'] = $d['goods_price'];
-        $o_detail[$r]['tax'] = '0';
-        $o_detail[$r]['goods'] = $d['goods_name'];
-        $o_detail[$r]['number'] = $d['goods_number'];
-    }
-    $d_order = array(
-        "amount" => $order['order_amount'],
-        "price" => $order['order_amount'],
-        "orderDetail"=>$o_detail,
+    //兜礼未支付订单同步 by xiaoq 只有兜礼会员下的订单才同步
+//    var_dump($userInfo);exit;
+    if(!empty($userInfo['cardnumber'])){
+        if($payment['pay_code'] == 'doolypay'){
+            $is_dly = true;
+        }else{
+            $is_dly = false;
+        }
+        $sql_d = "SELECT * FROM " . $ecs->table('order_goods') . " WHERE order_id =" . $order['order_id'];
+        $resd = $db->getAll($sql_d);
+        foreach($resd as $r => $d){
+            $o_detail[$r]['code'] = $d['goods_sn'];
+            $o_detail[$r]['amount'] = $d['goods_price'];
+            $o_detail[$r]['category'] = '0000';
+            $o_detail[$r]['price'] = $d['goods_price'];
+            $o_detail[$r]['tax'] = '0';
+            $o_detail[$r]['goods'] = $d['goods_name'];
+            $o_detail[$r]['number'] = $d['goods_number'];
+        }
+        $d_order = array(
+            "amount" => $order['order_amount'],
+            "price" => $order['order_amount'],
+            "orderDetail"=>$o_detail,
 //        "storesId" => "A001",
-        "orderDate" => date("Y-m-d H:i:s", time()),
-        "orderNumber" => $order['order_sn'],
-        "serialNumber" => $order['log_id'],
+            "orderDate" => date("Y-m-d H:i:s", time()),
+            "orderNumber" => $order['order_sn'],
+            "serialNumber" => $order['log_id'],
 //        "businessId" => "TEST_0d4e9c9ae4f81ee0838797d849c69c361",
-        "type" => $is_dly?'0':'1',
+            "type" => $is_dly?'0':'1',
 //        "cardNumber" => "15921213465",
-    );
-    $sql_u = "SELECT cardnumber FROM " . $ecs->table('users') . " WHERE user_id =" . $_SESSION['user_id'];
-    $resu = $db->getOne($sql_u);
-    $d_order['cardNumber'] = $resu?$resu:'';
-    include_once("interface/reachlife.php");
-    $Reachlife = new Reachlife();
-    $resc = $Reachlife->curl('noPayOrdersSynchronization', $d_order);
+        );
+        $sql_u = "SELECT cardnumber FROM " . $ecs->table('users') . " WHERE user_id =" . $_SESSION['user_id'];
+        $resu = $db->getOne($sql_u);
+        $d_order['cardNumber'] = $resu?$resu:'';
+        include_once("interface/reachlife.php");
+        $Reachlife = new Reachlife();
+        $resc = $Reachlife->curl('noPayOrdersSynchronization', $d_order);
+        error_log("\n 兜礼未支付订单同步接口{$order['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
+        $smarty->assign('cardNumber', $resu);
+    }
 //    echo "<pre>";
 //    print_r($resc);exit;
     //end
@@ -2136,6 +2145,109 @@ elseif ($_REQUEST['step'] == 'done')
     unset($_SESSION['flow_consignee']); // 清除session中保存的收货人信息
     unset($_SESSION['flow_order']);
     unset($_SESSION['direct_shopping']);
+}
+elseif($_REQUEST['step'] == 'get_dooly_code'){
+    require_once(ROOT_PATH .'includes/cls_json.php');
+    $json = new JSON();
+
+    $sql_o = "SELECT * FROM " . $ecs->table('order_info') . " WHERE order_id =" . $_POST['order_id'];
+    $sql_d = "SELECT * FROM " . $ecs->table('order_goods') . " WHERE order_id =" . $_POST['order_id'];
+    $sql_p = "SELECT log_id FROM " . $ecs->table('pay_log') . " WHERE order_id =" . $_POST['order_id'];
+    $orderInfo = $db->getRow($sql_o);
+//    die($json->encode($orderInfo));
+    $orderGoods = $db->getAll($sql_d);
+    $log_id = $db->getOne($sql_p);
+//    die($json->encode($orderGoods));
+//    die($json->encode($log_id));
+    foreach($orderGoods as $r => $d){
+        $o_detail[$r]['code'] = $d['goods_sn'];
+        $o_detail[$r]['amount'] = $d['goods_price'];
+        $o_detail[$r]['category'] = '0000';
+        $o_detail[$r]['price'] = $d['goods_price'];
+        $o_detail[$r]['tax'] = '0';
+        $o_detail[$r]['goods'] = $d['goods_name'];
+        $o_detail[$r]['number'] = $d['goods_number'];
+    }
+    $d_order = array(
+        "amount" => $orderInfo['order_amount'],
+        "price" => $orderInfo['order_amount'],
+        "orderDetail"=>$o_detail,
+//        "storesId" => "A001",
+        "orderDate" => date("Y-m-d H:i:s", time()),
+        "orderNumber" => $orderInfo['order_sn'],
+        "serialNumber" => $log_id,
+//        "businessId" => "TEST_0d4e9c9ae4f81ee0838797d849c69c361",
+//        "cardNumber" => "15921213465",
+    );
+//    $sql_u = "SELECT cardnumber FROM " . $ecs->table('users') . " WHERE user_id =" . $_SESSION['user_id'];
+//    $resu = $db->getOne($sql_u);
+    $d_order['cardNumber'] = $_POST['cardnumber']?$_POST['cardnumber']:'';
+    include_once("interface/reachlife.php");
+    $Reachlife = new Reachlife();
+    $resc = $Reachlife->curl('makePayVerificationCode', $d_order);
+    error_log("\n 获取积分验证码接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
+//    die($json->encode($resc));
+//    $resu = $json->decode($resc, true);
+    if($resu['code'] == '0'){
+        $result = array('status' => 'succ', 'msg' => '获取验证码成功');
+        if($resu['isPayPassword'] == '1'){
+            $result['is_pay_pwd'] = 'true';
+        }else{
+            $result['is_pay_pwd'] = 'false';
+        }
+    }else{
+        $result = array('status' => 'fail', 'msg' => $resc['info']);
+    }
+//    $result['is_pay_pwd'] = 'true';
+    die($json->encode($result));
+}elseif($_REQUEST['step'] == 'pay_dooly'){
+    require_once(ROOT_PATH .'includes/cls_json.php');
+    require_once(ROOT_PATH .'includes/lib_payment.php');
+    $json = new JSON();
+
+    $sql_o = "SELECT * FROM " . $ecs->table('order_info') . " WHERE order_id =" . $_POST['order_id'];
+    $sql_d = "SELECT * FROM " . $ecs->table('order_goods') . " WHERE order_id =" . $_POST['order_id'];
+    $sql_p = "SELECT log_id FROM " . $ecs->table('pay_log') . " WHERE order_id =" . $_POST['order_id'];
+    $orderInfo = $db->getRow($sql_o);
+    $orderGoods = $db->getAll($sql_d);
+    $log_id = $db->getOne($sql_p);
+
+//    die($json->encode($orderInfo));
+    foreach($orderGoods as $r => $d){
+        $o_detail[$r]['code'] = $d['goods_sn'];
+        $o_detail[$r]['amount'] = $d['goods_price'];
+        $o_detail[$r]['category'] = '0000';
+        $o_detail[$r]['price'] = $d['goods_price'];
+        $o_detail[$r]['tax'] = '0';
+        $o_detail[$r]['goods'] = $d['goods_name'];
+        $o_detail[$r]['number'] = $d['goods_number'];
+    }
+    $d_order = array(
+        "amount" => $orderInfo['order_amount'],
+        "verificationCode" => $_POST['dcode']?$_POST['dcode']:'',
+        "orderDate" => date("Y-m-d H:i:s", time()),
+        "orderNumber" => $orderInfo['order_sn'],
+        "serialNumber" => $log_id,
+        "payPassword" => $_POST['dpwd']?$_POST['dpwd']:'0',
+        "productDetail" => $o_detail,
+//        "businessId" => "TEST_0d4e9c9ae4f81ee0838797d849c69c361",
+//        "cardNumber" => "15921213465",
+    );
+    $d_order['cardNumber'] = $_POST['cardnumber']?$_POST['cardnumber']:'';
+
+    include_once("interface/reachlife.php");
+    $Reachlife = new Reachlife();
+    $resc = $Reachlife->curl('checkIntegralConsumption', $d_order);
+    error_log("\n 兜礼积分支付接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
+//    $resc['code'] = '0';
+
+    if($resc['code'] == '0'){
+        order_paid($log_id, 2);
+        $result = array('status' => 'succ', 'msg' => '积分消费成功');
+    }else{
+        $result = array('status' => 'fail', 'msg' => $resc['info']);
+    }
+    die($json->encode($result));
 }
 elseif ($_REQUEST['step'] == 'ajax_drop_goods')
 {

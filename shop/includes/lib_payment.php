@@ -154,7 +154,64 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
             $sql = 'UPDATE ' . $GLOBALS['ecs']->table('pay_log') .
                     " SET is_paid = '1' WHERE log_id = '$log_id'";
             $GLOBALS['db']->query($sql);
-
+            //已支付订单同步到兜礼平台 by xiaoq 2017-10-22
+            $sql_o = "SELECT * FROM " . $GLOBALS['ecs']->table('order_info') . " WHERE order_id = '{$pay_log['order_id']}'";
+            $sql_g = "SELECT * FROM " . $GLOBALS['ecs']->table('order_goods') . " WHERE order_id = '{$pay_log['order_id']}'";
+            $orderInfo = $GLOBALS['db']->getRow($sql_o);
+            $orderGoods = $GLOBALS['db']->getAll($sql_g);
+            if($pay_status == PS_PAYED && $orderInfo['from_dooly'] == 'true'){
+                $sql_u = "SELECT cardnumber FROM " . $GLOBALS['ecs']->table('users') . " WHERE user_id =" . $orderInfo['user_id'];
+                $resu = $GLOBALS['db']->getOne($sql_u);
+//                var_dump($orderGoods);exit;
+                //兜礼多笔流水已支付订单同步
+                //支付流水明细
+                $orderSerialDetail = array(
+                    'amount' => $pay_log['order_amount'],
+                    'serialNumber' => $pay_log['order_amount'],
+                    'payType' => $orderInfo['pay_name'] == "兜礼积分"?'0':'1',
+                    'orderDate' => date("Y-m-d H:i:s", $orderInfo['add_time']),
+                );
+                //订单详情
+                foreach($orderGoods as $r => $d){
+                    $orderDetail[$r]['code'] = $d['goods_sn'];
+                    $orderDetail[$r]['amount'] = $d['goods_price'];
+                    $orderDetail[$r]['category'] = '0000';
+                    $orderDetail[$r]['price'] = $d['goods_price'];
+                    $orderDetail[$r]['tax'] = '0';
+                    $orderDetail[$r]['goods'] = $d['goods_name'];
+                    $orderDetail[$r]['number'] = $d['goods_number'];
+                }
+                //订单附加信息
+                $sql_s = "SELECT * FROM " . $GLOBALS['ecs']->table('shipping') . " WHERE shipping_id = '{$orderInfo['shipping_id']}'";
+                $shippingInfo = $GLOBALS['db']->getRow($sql_s);
+                $sql_pro = "SELECT * FROM " . $GLOBALS['ecs']->table('region') . " WHERE region_id = '{$orderInfo['province']}'";
+                $sql_cit = "SELECT * FROM " . $GLOBALS['ecs']->table('region') . " WHERE region_id = '{$orderInfo['city']}'";
+                $sql_dis = "SELECT * FROM " . $GLOBALS['ecs']->table('region') . " WHERE region_id = '{$orderInfo['district']}'";
+                $province = $GLOBALS['db']->getOne($sql_pro);
+                $city = $GLOBALS['db']->getOne($sql_cit);
+                $district = $GLOBALS['db']->getOne($sql_dis);
+                $orderAdddtionalInfo = array(
+                    'expressCompanyCode' => $shippingInfo['shipping_code'],
+                    'expressCompanyName' => $shippingInfo['shipping_name'],
+                    'courierNumber' => $orderInfo['invoice_no'],
+                    'receiverName' => $orderInfo['consignee'],
+                    'receiverTelephone' => !empty($orderInfo['tel'])?$orderInfo['tel']:$orderInfo['mobile'],
+                    'deliveryAddress' => $province.$city.$district.$orderInfo['address'],
+                );
+                $d_order = array(
+                    'cardNumber' => $resu?$resu:'',
+                    'orderPrice' => $orderInfo['order_amount'],
+                    'orderNumber' => $orderInfo['order_sn'],
+                    'orderSerialDetail' => $orderSerialDetail,
+                    'orderDetail' => $orderDetail,
+                    'orderAdddtionalInfo' => $orderAdddtionalInfo
+                );
+//                var_dump($d_order);exit;
+                include_once(ROOT_PATH."interface/reachlife.php");
+                $Reachlife = new Reachlife();
+                $resc = $Reachlife->curl('checkTransactionCompletionV2', $d_order);
+                error_log("\n 兜礼已支付订单同步接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
+            }
             /* 根据记录类型做相应处理 */
             if ($pay_log['order_type'] == PAY_ORDER)
             {
