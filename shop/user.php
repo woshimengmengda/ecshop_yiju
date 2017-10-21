@@ -1058,6 +1058,25 @@ elseif ($action == 'cancel_order')
 
     if (cancel_order($order_id, $user_id))
     {
+        //兜礼取消未支付订单同步接口 by xiaoq 2017-10-22
+        $sql_o = "SELECT * FROM " . $ecs->table('order_info') . " WHERE order_id =" . $order_id;
+        $orderInfo = $db->getRow($sql_o);
+        if($orderInfo['from_dooly'] == 'true'){
+//        $sql_u = "SELECT cardnumber FROM " . $ecs->table('users') . " WHERE user_id =" . $user_id;
+//        $resu = $db->getOne($sql_u);
+            $sql_p = "SELECT log_id FROM " . $ecs->table('pay_log') . " WHERE order_id =" . $order_id;
+            $log_id = $db->getOne($sql_p);
+            $d_oeder = array(
+                'orderNumber' => $orderInfo['order_sn'],
+                'serialNumber' => $log_id,
+            );
+//        $d_order['cardNumber'] = $resu?$resu:'';
+            include_once("interface/reachlife.php");
+            $Reachlife = new Reachlife();
+            $resc = $Reachlife->curl('noPayOrdersCancalSynchronization', $d_order);
+            error_log("\n 兜礼取消未支付订单同步接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
+        }
+
         // 通知erp取消订单
         include_once(ROOT_PATH . 'includes/cls_matrix.php');
         $matrix = new matrix();
