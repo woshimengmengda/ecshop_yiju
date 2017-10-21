@@ -64,12 +64,8 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
                                 }
                             }
                         }else{//不存在则添加
-                            $username = $mv['telephone'];
-                            $password = $mv['cardNumber'];
-                            $email = '';
-                            $res = $GLOBALS['user']->add_user($username, $password, $email);
-                            //更新新增会员卡号
-                            if($res){
+                            $user = get_user_by_mobile($mv['telephone']);
+                            if(!empty($user)){
                                 $params['cardnumber'] = $mv['cardNumber'];
                                 $params['user_name'] = $mv['telephone'];
                                 if(update_user_cardnumber($params)){
@@ -78,9 +74,23 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
                                     echo "新增会员成功，更新会员卡号失败";
                                 }
                             }else{
-                                echo "新增会员失败";
+                                $username = $mv['telephone'];
+                                $password = $mv['cardNumber'];
+                                $email = '';
+                                $res = $GLOBALS['user']->add_user($username, $password, $email);
+                                //更新新增会员卡号
+                                if($res){
+                                    $params['cardnumber'] = $mv['cardNumber'];
+                                    $params['user_name'] = $mv['telephone'];
+                                    if(update_user_cardnumber($params)){
+                                        echo "新增会员成功，更新会员卡号成功";
+                                    }else{
+                                        echo "新增会员成功，更新会员卡号失败";
+                                    }
+                                }else{
+                                    echo "新增会员失败";
+                                }
                             }
-
                         }
                         break;
                 }
@@ -212,6 +222,35 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
         ecs_header("Location: $targetUrl\n");
         exit;
     }
+}elseif($action == 'sync_dooly_users_by_ftp'){//0-6点 ftp上传前一天的会员增量
+    $endTime = strtotime(date("Ymd"));
+    $beginTime = strtotime(date("Ymd",strtotime("-1 day")));
+    $user_list = $GLOBALS['db']->getAll("SELECT * FROM " . $GLOBALS['ecs']->table('users') . " WHERE reg_time >= '{$beginTime}' and reg_time < '{$endTime}' and cardnumber is not null");
+    $date_w = date("Ymd", strtotime("-1 day"));
+    $txtName = "shopId_".$date_w.".txt";
+    $dayUserFile = fopen($txtName, "a");
+    $readFile = fopen($txtName, 'r');
+    $str = "员工手机号,员工卡号,员工状态\n";
+    $s = fgets($readFile);
+    if(!empty($s)){
+        $str = "";
+    }
+    foreach($user_list as $k => $v){
+        $str = $str.$v['user_name'].",".$v['cardnumber'].",0\n";
+    }
+    $res_write = fwrite($dayUserFile, $str);
+    fclose($dayUserFile);
+    //自动上传至ftp
+    // 连接FTP服务器
+    $conn = ftp_connect(www.example.com);
+    // 使用username和password登录
+    ftp_login($conn, "username", "password");
+    //进入目录中用ftp_chdir()函数，它接受一个目录名作为参数。
+    ftp_chdir($conn, "/member");
+    $res_put = ftp_put($conn, $txtName, $txtName, FTP_ASCII);
+    // 关闭联接
+    ftp_close($conn);
+    error_log("\n 兜礼会员数据每日增量核对接口，生成文件{$txtName}结果为{$res_write}，上传到ftp结果为{$res_put} \n", 3, ROOT_PATH."elog.log");
 }
 //根据会员手机号获取会员信息
 function get_user_by_mobile($mobile){
@@ -225,7 +264,8 @@ function get_user_by_cardnumber($cardnumber){
 }
 //新增会员更新会员卡号
 function update_user_cardnumber($params){
-    $user = $GLOBALS['db']->query("update " . $GLOBALS['ecs']->table('users') . "set cardnumber= '{$params['cardnumber']}'  WHERE user_name = '{$params['user_name']}'");
+    $now_time = time();
+    $user = $GLOBALS['db']->query("update " . $GLOBALS['ecs']->table('users') . "set cardnumber= '{$params['cardnumber']}',reg_time='{$now_time}'  WHERE user_name = '{$params['user_name']}'");
     return $user;
 }
 //更新会员用户名为手机号
