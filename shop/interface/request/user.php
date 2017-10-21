@@ -32,7 +32,7 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
         'page' => 1
     );
     $res = page_sync_user($param);
-    $result = json_decode($res, true);
+//    $result = json_decode($res, true);
     //同步成功返回数据
     if($result['code'] == '0'){
         foreach ((array)$result['DateDetail'] as $mk => $mv){
@@ -56,9 +56,9 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
                             $params['user_id'] = $user['user_id'];
                             $params['mobile'] = $mv['telephone'];
                             if(update_user_name($params)){
-                                echo "存在相同卡号会员，手机号不同，更新手机号成功";exit;
+                                echo "存在相同卡号会员，手机号不同，更新手机号成功";
                             }else{
-                                echo "存在相同卡号会员，手机号不同，更新手机号失败";exit;
+                                echo "存在相同卡号会员，手机号不同，更新手机号失败";
                             }
                         }
                     }else{//不存在则添加
@@ -71,30 +71,149 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
                             $params['cardnumber'] = $mv['cardNumber'];
                             $params['user_name'] = $mv['telephone'];
                             if(update_user_cardnumber($params)){
-                                echo "新增会员成功，更新会员卡号成功";exit;
+                                echo "新增会员成功，更新会员卡号成功";
                             }else{
-                                echo "新增会员成功，更新会员卡号失败";exit;
+                                echo "新增会员成功，更新会员卡号失败";
                             }
                         }else{
-                            echo "新增会员失败";exit;
+                            echo "新增会员失败";
                         }
 
                     }
                     break;
             }
         }
-    }else{
-        echo "<pre>";
-        print_r($res);exit;
     }
-}elseif($action == "sync_user"){
-    $res = sync_user();
-    echo "<pre>";
-    print_r($res);
+//    error_log("\n 兜礼会员同步接口params \n".var_export($param, 1)."\n 结果res \n".var_export($res, 1)."\n", 3, ROOT_PATH."elog.log");
+}elseif($action == 'dooly_login'){
+    //兜礼一号通登录接口 by xiaoq 2017-10-22
+    $shopId = 'shopId';
+    $shopKey = 'shopKey';
+    $getParams = $_GET;
+    $now_time = time();
+    $targetUrl = urldecode($getParams['targetUrl']);
+    if(empty($targetUrl)){
+        $targetUrl = "http:\/\/".$_SERVER['HTTP_HOST']."\/user.php";
+    }
+//    $targetUrl = "http://dev.shop.net/user.php";
+//    $getParams = array(
+//        'cardNumber' => '46694100211',
+//        'mobile' => '18717752290',
+//    );
+    $str = md5("shopId=".$shopId."&shopKey=".$shopKey."&mobile=".$getParams['mobile']."&cardNumber=".$getParams['cardNumber']."&actionTime=".$getParams['actionTime']);
+    if($str == $getParams['sign']){
+        //存在会员时
+        if($user = get_user_by_cardnumber($getParams['cardNumber'])){
+//            var_dump($user);exit;
+            //会员手机号没变
+            if($user['user_name'] == $getParams['mobile']){
+                if($now_time-$getParams['actionTime']>180){
+                    //超时 不带登录状态跳转
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }else{
+                    //未超时 带登录状态跳转
+                    require_once(ROOT_PATH . 'includes/modules/integrates/integrate.php');
+                    $integrate = new integrate();
+                    $integrate->set_session($user['user_name']);
+                    $integrate->set_cookie($user['user_name']);
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }
+            }else{//会员手机号变了
+                if($now_time-$getParams['actionTime']>180){
+                    if(!empty($getParams['mobile'])){
+                        $params['user_id'] = $user['user_id'];
+                        $params['mobile'] = $getParams['mobile'];
+                        update_user_name($params);
+                    }
+                    //超时 不带登录状态跳转
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }else{
+                    if(!empty($getParams['mobile'])){
+                        $params['user_id'] = $user['user_id'];
+                        $params['mobile'] = $getParams['mobile'];
+                        update_user_name($params);
+                    }
+                    //未超时 带登录状态跳转
+                    require_once(ROOT_PATH . 'includes/modules/integrates/integrate.php');
+                    $integrate = new integrate();
+                    $integrate->set_session($getParams['mobile']);
+                    $integrate->set_cookie($getParams['mobile']);
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }
+            }
+        }else{//不存在用户
+            //存在相同手机号 更新卡号
+            if($user = get_user_by_mobile($getParams['mobile'])){
+                if($now_time-$getParams['actionTime']>180){
+                    $params['cardnumber'] = $getParams['cardNumber'];
+                    $params['user_name'] = $getParams['mobile'];
+                    update_user_cardnumber($params);
+                    //超时 不带登录状态跳转
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }else{
+                    $params['cardnumber'] = $getParams['cardNumber'];
+                    $params['user_name'] = $getParams['mobile'];
+                    update_user_cardnumber($params);
+                    //未超时 带登录状态跳转
+                    require_once(ROOT_PATH . 'includes/modules/integrates/integrate.php');
+                    $integrate = new integrate();
+                    $integrate->set_session($getParams['mobile']);
+                    $integrate->set_cookie($getParams['mobile']);
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }
+            }else{//新增用户
+                if($now_time-$getParams['actionTime']>180){
+                    $username = $getParams['mobile'];
+                    $password = $getParams['cardNumber'];
+                    $email = '';
+                    $res = $GLOBALS['user']->add_user($username, $password, $email);
+                    if($res){
+                        $params['cardnumber'] = $getParams['cardNumber'];
+                        $params['user_name'] = $getParams['mobile'];
+                        update_user_cardnumber($params);
+                    }
+                    //超时 不带登录状态跳转
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }else{
+                    $username = $getParams['mobile'];
+                    $password = $getParams['cardNumber'];
+                    $email = '';
+                    $res = $GLOBALS['user']->add_user($username, $password, $email);
+                    if($res){
+                        $params['cardnumber'] = $getParams['cardNumber'];
+                        $params['user_name'] = $getParams['mobile'];
+                        update_user_cardnumber($params);
+                    }
+                    //未超时 带登录状态跳转
+                    require_once(ROOT_PATH . 'includes/modules/integrates/integrate.php');
+                    $integrate = new integrate();
+                    $integrate->set_session($getParams['mobile']);
+                    $integrate->set_cookie($getParams['mobile']);
+                    ecs_header("Location: $targetUrl\n");
+                    exit;
+                }
+            }
+        }
+    }else{
+        ecs_header("Location: $targetUrl\n");
+        exit;
+    }
+}
+//根据会员手机号获取会员信息
+function get_user_by_mobile($mobile){
+    $user = $GLOBALS['db']->getRow("SELECT * FROM " . $GLOBALS['ecs']->table('users') . " WHERE user_name = '{$mobile}'");
+    return $user;
 }
 //根据会员卡号获取会员信息
 function get_user_by_cardnumber($cardnumber){
-    $user = $GLOBALS['db']->getRow("SELECT * FROM " . $GLOBALS['ecs']->table('users') . " WHERE cardnumber = '$cardnumber'");
+    $user = $GLOBALS['db']->getRow("SELECT * FROM " . $GLOBALS['ecs']->table('users') . " WHERE cardnumber = '{$cardnumber}'");
     return $user;
 }
 //新增会员更新会员卡号
