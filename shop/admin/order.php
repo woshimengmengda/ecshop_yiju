@@ -4302,6 +4302,51 @@ elseif ($_REQUEST['act'] == 'operate_post')
                 SET send_number = 0
                 WHERE order_id = '$order_id'";
         $GLOBALS['db']->query($sql, 'SILENT');
+
+        //兜礼退货同步接口 by xiaoq 2017-10-22
+        $sql_o = "SELECT * FROM " . $GLOBALS['ecs']->table('order_info') . " WHERE order_id = '{$order_id}'";
+        $sql_g = "SELECT * FROM " . $GLOBALS['ecs']->table('order_goods') . " WHERE order_id = '{$order_id}'";
+        $sql_p = "SELECT log_id FROM " . $ecs->table('pay_log') . " WHERE order_id =" . $order_id;
+        $log_id = $db->getOne($sql_p);
+        $orderInfo = $GLOBALS['db']->getRow($sql_o);
+        $orderGoods = $GLOBALS['db']->getAll($sql_g);
+        if($orderInfo['from_dooly'] == 'true'){
+            $sql_u = "SELECT cardnumber FROM " . $GLOBALS['ecs']->table('users') . " WHERE user_id =" . $orderInfo['user_id'];
+            $resu = $GLOBALS['db']->getOne($sql_u);
+//                var_dump($orderGoods);exit;
+            //兜礼多笔流水退货订单同步
+            //支付流水明细
+            $orderSerialDetail = array(
+                'amount' => $orderInfo['order_amount'],
+                'serialNumber' => $log_id,
+                'payType' => $orderInfo['pay_name'] == "兜礼积分"?'0':'1',
+                'orderDate' => date("Y-m-d H:i:s", time()),
+                'pointCardNumber' => $resu,
+            );
+            //订单详情
+            foreach($orderGoods as $r => $d){
+                $orderDetail[$r]['code'] = $d['goods_sn'];
+                $orderDetail[$r]['amount'] = $d['goods_price'];
+                $orderDetail[$r]['category'] = '0000';
+                $orderDetail[$r]['price'] = $d['goods_price'];
+                $orderDetail[$r]['tax'] = '0';
+                $orderDetail[$r]['goods'] = $d['goods_name'];
+                $orderDetail[$r]['number'] = $d['goods_number'];
+            }
+            $d_order = array(
+                'cardNumber' => $resu?$resu:'',
+                'orderPrice' => $orderInfo['order_amount'],
+                'orderNumber' => $orderInfo['order_sn'],
+                'orderSerialDetail' => $orderSerialDetail,
+                'orderDetail' => $orderDetail,
+            );
+//                var_dump($d_order);exit;
+            include_once(ROOT_PATH."interface/reachlife.php");
+            $Reachlife = new Reachlife();
+            $resc = $Reachlife->curl('checkRefundIntegralAuthorizationV2', $d_order);
+            error_log("\n 兜礼退货订单同步接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
+        }
+
         // 更新订单crm
         $is_succ = update_order_crm($order['order_sn']);
         if ($is_succ){

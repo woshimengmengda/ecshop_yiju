@@ -167,7 +167,7 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
                 //支付流水明细
                 $orderSerialDetail = array(
                     'amount' => $pay_log['order_amount'],
-                    'serialNumber' => $pay_log['order_amount'],
+                    'serialNumber' => $pay_log['log_id'],
                     'payType' => $orderInfo['pay_name'] == "兜礼积分"?'0':'1',
                     'orderDate' => date("Y-m-d H:i:s", $orderInfo['add_time']),
                 );
