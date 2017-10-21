@@ -665,13 +665,19 @@ padding: 10px 20px 12px; height:auto; cursor:pointer; border:none;" value="加�
         </div>
     </div>
     
-    <!-- {if $pay_online} --> 
-    <!-- 如果是线上支付则显示支付按钮 -->
-    <div class="section section-payment">
-            <div class="pay_action">{$pay_online}</div>
-    </div>
+    <!-- {if $pay_online} -->
+        <!-- {if $pay_online eq 'doolypay'} -->
+            <input type="text" value='' id="dooly_code">
+            <input type="button" id="dooly_button">
+            <input type="button" id="dooly_pay">
+        <!-- {else} -->
+            <!-- 如果是线上支付则显示支付按钮 -->
+            <div class="section section-payment">
+                    <div class="pay_action">{$pay_online}</div>
+            </div>
+        <!-- {/if} -->
     <!-- {/if} -->
-        
+
     <!--{if $virtual_card}-->
     <div class="section section-payment">
         <div style="text-align:center;overflow:hidden;border:1px solid #E2C822;background:#FFF9D7;margin:10px;padding:10px 50px 30px;"> 

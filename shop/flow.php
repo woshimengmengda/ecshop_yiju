@@ -2119,7 +2119,8 @@ elseif ($_REQUEST['step'] == 'done')
 //    echo "<pre>";
 //    print_r($resc);exit;
     //end
-
+//    echo "<pre>";
+//    print_r($order);exit;
     /* 订单信息 */
     $smarty->assign('order',      $order);
     $smarty->assign('total',      $total);
