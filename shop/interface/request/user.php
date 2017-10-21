@@ -93,8 +93,9 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
     $now_time = time();
     $targetUrl = urldecode($getParams['targetUrl']);
     if(empty($targetUrl)){
-        $targetUrl = "http:\/\/".$_SERVER['HTTP_HOST']."\/user.php";
+        $targetUrl = "http:\/\/".$_SERVER['HTTP_HOST']."/user.php";
     }
+//    var_dump($targetUrl);exit;
 //    $targetUrl = "http://dev.shop.net/user.php";
 //    $getParams = array(
 //        'cardNumber' => '46694100211',
