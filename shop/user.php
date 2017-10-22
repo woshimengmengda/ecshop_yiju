@@ -883,6 +883,7 @@ elseif ($action == 'order_list')
 /* 查看订单详情 */
 elseif ($action == 'order_detail')
 {
+
     include_once(ROOT_PATH . 'includes/lib_transaction.php');
     include_once(ROOT_PATH . 'includes/lib_payment.php');
     include_once(ROOT_PATH . 'includes/lib_order.php');
@@ -933,7 +934,9 @@ elseif ($action == 'order_detail')
     if ($order['order_amount'] > 0 && $order['pay_status'] == PS_UNPAYED && $order['shipping_status'] == SS_UNSHIPPED)
     {
         $payment_list = available_payment_list(false, 0, true);
-
+        $sql_u = "SELECT cardnumber FROM " . $ecs->table('users') . " WHERE user_id =" . $_SESSION['user_id'];
+        $resu = $db->getOne($sql_u);
+//        echo 123;exit;
         /* 过滤掉当前支付方式和余额支付方式 */
         if(is_array($payment_list))
         {
@@ -943,7 +946,15 @@ elseif ($action == 'order_detail')
                 {
                     unset($payment_list[$key]);
                 }
+                if(empty($resu) && $payment['pay_code'] == 'doolypay'){
+                    unset($payment_list[$key]);
+                }
             }
+        }
+//        echo "<pre>";
+//        print_r($payment_list);exit;
+        if(!empty($resu)){
+            $smarty->assign('cardNumber', $resu);
         }
         $smarty->assign('payment_list', $payment_list);
     }
