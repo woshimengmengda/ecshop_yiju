@@ -31,6 +31,21 @@
             <div class="info-price">
                 <span class="price-shop" ng-class="{danger: currentStock}">{{currentSelectedPrice| currency:"￥"}}</span>
                 <span class="price-market">{{product.price| currency:"￥"}}</span>
+                <span style="margin-bottom: 26px;margin-top: 26px;" ng-if="user.cardnumber"><div style="line-height: 24px;
+    border-radius: 10px 0 0 10px;
+    background-color: #EE3F44;
+    width: 150px;
+    color: white;
+    margin-top: 10px;
+    font-size: 12px;">&nbsp&nbsp&nbsp&nbsp兜礼专享价{{product.dooly_price| currency:"￥"}}</div><div style="line-height: 22px;
+    border-radius: 0 10px 10px 0;
+    background-color: white;
+    width: 100px;
+    color: #EE3F44;
+    border: 1px solid #EE3F44;
+    margin-top: -24px;
+    margin-left: 150px;
+    font-size: 12px;">&nbsp&nbsp立省{{product.dooly_discount_price}}元</div></span>
             </div>
             <div class="info-favorite" ng-click="touchLike()">
                 <img src="image/favorite-off.png" ng-if="!product.is_liked"/>

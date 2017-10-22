@@ -8,11 +8,12 @@
 
     <div class="app-content">
         <div class="profile-head">
-            <img class="head-avatar" ng-src="image/default-avatar.png" lazy-img="{{user.avatar.thumb}}"/>
-
+            <img class="head-avatar" ng-src="image/default-avatar.png" lazy-img="{{user.avatar.thumb}}" ng-if="!user.cardnumber"/>
+            <img class="head-avatar" ng-src="image/dooly.jpg" lazy-img="{{user.avatar.thumb}}" ng-if="user.cardnumber"/>
             <div class="head-info" ng-click="touchSignin()">
                 <div class="info-name">{{isSignIn() ? userName: '点击登录'}}</div>
-                <div class="info-grade" ng-if="isSignIn()">{{user.rank ? user.rank.name : '默认等级'}}</div>
+                <div class="info-grade" ng-if="isSignIn() && !user.cardnumber">{{user.rank ? user.rank.name : '默认等级'}}</div>
+                <div style="line-height: 20px;border-radius: 10px;background-color: #EE3F44;width: 75px;color:white;margin-top:6px;font-size: 12px;" ng-if="user.cardnumber">&nbsp&nbsp&nbsp&nbsp兜礼会员</div>
             </div>
         </div>
 
