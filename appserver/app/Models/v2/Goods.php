@@ -505,8 +505,7 @@ class Goods extends BaseModel
         /* 取得商品信息 */
         $goods = Goods::where('goods.goods_id',$goods_id)->where('goods.is_delete',0)->leftJoin('member_price',function($query){
             $query->on('member_price.goods_id', '=', 'goods.goods_id');
-        })->first(['goods.promote_price','goods.promote_start_date','goods.promote_end_date','member_price.user_price']);
-	
+        })->first(['goods.promote_price','goods.promote_start_date','goods.promote_end_date','goods.dooly_price','member_price.user_price']);
 	$member_price = UserRank::getMemberRankPriceByGid($goods_id);
 	$user_rank = UserRank::getUserRankByUid();
 	$user_price = MemberPrice::getMemberPriceByUid($user_rank['rank_id'],$goods_id);
@@ -559,6 +558,9 @@ class Goods extends BaseModel
             }
         }
         //返回商品最终购买价格
+        if($goods['dooly_price'] > 0){
+            return $goods['dooly_price'];
+        }
         return $final_price;
     }
 

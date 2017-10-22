@@ -124,6 +124,8 @@ class UserController extends Controller
     public function profile()
     {
         $data = Member::getMemberByToken();
+        $user = Member::user_info($data['user']['id']);
+        $data['user']['cardnumber'] = !empty($user['cardnumber'])?$user['cardnumber']:'';
         return $this->json($data);
     }
 

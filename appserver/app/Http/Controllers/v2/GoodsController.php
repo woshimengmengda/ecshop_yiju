@@ -272,7 +272,20 @@ class GoodsController extends Controller
         }
 
         $data = Goods::getInfo($this->validated);
-        
+        //获取兜礼会员价
+        $goods = Goods::where("goods_id", $data['product']['id'])->first();
+        $data['product']['dooly_price'] = $goods['dooly_price'];
+        $dshop_price = $data['product']['current_price'];
+        $dooly_price = $goods['dooly_price'];
+
+        if($goods['dooly_price'] <= 0){
+            $dooly_price = $dshop_price;
+        }
+        $dooly_discount_price = $dshop_price-$dooly_price;
+        if($dooly_discount_price > 0){
+            $data['product']['dooly_discount_price'] = sprintf("%.2f", $dooly_discount_price);
+        }
+
         return $this->json($data);
     }
 
