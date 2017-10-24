@@ -80,6 +80,13 @@
 				});
 				break;
 			}
+			case 'doolypay.wap':
+			{
+                $state.go('doolypay', {
+                    order: PaymentModel.order.id
+                });
+                break;
+			}
 			default:
 				{
 					$scope.toast('暂不支持此方式');
