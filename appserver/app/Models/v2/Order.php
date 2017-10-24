@@ -196,6 +196,7 @@ class Order extends BaseModel {
                         'cod_fee'          => 0,
                         'pay_fee'          => 0,
                         'discount_price'   => 0,
+                        'total_shop_price'   => 0,
                         'tax'              => 0);
         $weight = 0;
         /* 商品总价 */
@@ -207,7 +208,10 @@ class Order extends BaseModel {
         $good_num = 0;
         foreach ($order_products as $key => $product) {
             $val = Goods::where('goods_id',$product['goods_id'])->first();
-            
+            $total['total_shop_price'] += $val['shop_price'];
+            if(isset($val['dooly_price']) && $val['dooly_price']>0){
+                $has_dooly = true;
+            }
             $volume_price  = $val['shop_price']; //商品优惠价格 如果不存在优惠价格列表 价格为店铺价格
             //取得商品优惠价格列表
             $price_list   = Goods::get_volume_price_list($product['goods_id'], '1');
@@ -378,6 +382,10 @@ class Order extends BaseModel {
         // if (isset($score)) {
             $order_price['promos'][] = ['promo' => 'score','price' => $total['integral_formated']];
         // }
+        $order_price['total_shop_price'] =  Goods::price_format($total['total_shop_price'], false);
+        if($has_dooly && $total['total_shop_price']>$total['goods_price']){
+            $order_price['discount_dooly_price'] = Goods::price_format(($total['total_shop_price']-$total['goods_price']), false);
+        }
         if ($total['discount_formated'] > 0) {
             $order_price['promos'][] = ['promo' => 'preferential','price' => $total['discount_formated']];
         }

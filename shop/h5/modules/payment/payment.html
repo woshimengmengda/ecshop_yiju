@@ -22,10 +22,11 @@
                 <div class="item-checkbox">
                 </div>
                 <div class="item-content">
+                    <div style=""  ng-if="user.cardnumber && payment.code == 'doolypay.wap'"><img src="image/dooly.jpg" style="width: 25px;height: 25px;position: absolute;margin-top: 8px;border-radius: 12.5px;" alt=""></div>
                     <div class="content-desc">
                         {{payment.desc}}
                     </div>
-                    <div class="content-title">
+                    <div class="content-title" style="margin-left: 30px;">
                         {{payment.name}}
                     </div>
                 </div>
