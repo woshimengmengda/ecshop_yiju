@@ -2239,9 +2239,12 @@ elseif($_REQUEST['step'] == 'get_dooly_code'){
     $Reachlife = new Reachlife();
     $resc = $Reachlife->curl('checkIntegralConsumption', $d_order);
     error_log("\n 兜礼积分支付接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
-//    $resc['code'] = '0';
+    $resc['code'] = '0';
 
     if($resc['code'] == '0'){
+        //如果是兜礼支付 给订单加上兜礼标识 by xiaoq 2017-10-25
+        $sql_update = "update " . $ecs->table('order_info') . " set from_dooly = 'true' WHERE order_id =" . $_POST['order_id'];
+        $db->query($sql_update);
         order_paid($log_id, 2);
         $result = array('status' => 'succ', 'msg' => '积分消费成功');
     }else{
