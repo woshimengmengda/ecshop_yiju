@@ -50,14 +50,20 @@ class Payment extends BaseModel {
 
                     array_push($model, $arr);
                 }
-                //兜礼积分支付
-                $arr = [
-                    'name' => '兜礼积分',
-                    'code' => 'doolypay.wap',
-                    'desc' => '兜礼积分'
-                ];
+                //兜礼积分支付 如果是兜礼会员
+                $user_id = Token::authorization();
+                $userInfo = Member::where("user_id", $user_id)->first();
+                $cardnumber = $userInfo['cardnumber'] ? $userInfo['cardnumber']: '';
+                if(!empty($cardnumber)){
+                    $arr = [
+                        'name' => '兜礼积分',
+                        'code' => 'doolypay.wap',
+                        'desc' => '兜礼积分'
+                    ];
 
-                array_push($model, $arr);
+                    array_push($model, $arr);
+                }
+
 
                 //天工收银
                 // if ($arr = Pay::where('pay_code', 'balance')->where('enabled', '1')->first()) {
