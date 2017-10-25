@@ -16,7 +16,7 @@ class Order extends BaseModel {
 
     protected $guarded = [];
     protected $appends = ['id', 'sn', 'total', 'payment', 'shipping', 'invoice', 'coupon', 'score','use_score', 'cashgift', 'consignee', 'status', 'created_at', 'updated_at', 'canceled_at', 'paied_at', 'shipping_at', 'finish_at','promos'];
-    protected $visible = ['id', 'sn', 'total', 'goods', 'payment', 'shipping', 'invoice', 'coupon', 'score', 'use_score', 'cashgift', 'consignee', 'status', 'created_at', 'updated_at', 'canceled_at', 'paied_at', 'shipping_at', 'finish_at','discount_price','promos'];
+    protected $visible = ['id', 'sn', 'total', 'goods', 'payment', 'shipping', 'invoice', 'coupon', 'score', 'use_score', 'cashgift', 'consignee', 'status', 'created_at', 'updated_at', 'canceled_at', 'paied_at', 'shipping_at', 'finish_at','discount_price','promos', 'total_shop_price', 'dooly_total_price', 'discount_dooly_price', 'from_dooly'];
 
     // ECM 订单状态
     const STATUS_CREATED     = 0; // 待付款
@@ -133,7 +133,12 @@ class Order extends BaseModel {
             $order_goods = OrderGoods::where('order_id',$order)->get();
             foreach ($order_goods as $key => $order_good) {
                 $val = Goods::where('goods_id',$order_good['goods_id'])->first();
-                
+                //给订单加兜礼优惠标识 by xiaoq 2017-10-25
+                $model['total_shop_price'] += $val['shop_price'];
+                if(isset($val['dooly_price']) && $val['dooly_price']>0){
+                    $has_dooly = true;
+                    $model['dooly_total_price'] += $val['dooly_price'];
+                }
                 $volume_price  = $val['shop_price']; //商品优惠价格 如果不存在优惠价格列表 价格为店铺价格
                 //取得商品优惠价格列表
                 $price_list   = Goods::get_volume_price_list($order_good['goods_id'], '1');
@@ -149,7 +154,10 @@ class Order extends BaseModel {
                 }
                 $discount_price = ($val['shop_price'] - $volume_price) * $order_good['goods_number'];
             }
-
+            $model['total_shop_price'] =  Goods::price_format($model['total_shop_price'], false);
+            if($has_dooly && $model['total_shop_price']>$model['dooly_total_price']){
+                $model['discount_dooly_price'] = Goods::price_format(($model['total_shop_price']-$model['dooly_total_price']), false);
+            }
             $model['discount_price'] = $discount_price;
             return self::formatBody(['order' => $model]);
         }

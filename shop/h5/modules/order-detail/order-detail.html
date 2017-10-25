@@ -81,6 +81,10 @@
             <div class="summury-total">
                 订单总价 <span class="total-price">= {{order.total| currency:"￥"}}</span>
             </div>
+            <div style="line-height: 24px;border-radius: 12px 0 0 12px;background-color: #EE3F44;width: 153px;color: white;margin-left: 54px;font-size: 12px;margin-top: 10px;margin-bottom: 10px;" ng-if="user.cardnumber && order.discount_dooly_price && order.from_dooly == 'true'">&nbsp&nbsp&nbsp&nbsp兜礼专享价{{order.total | currency:"￥"}}
+            </div>
+            <div style="line-height: 22px;border-radius: 0 12px 12px 0;background-color: white;width: 106px;color: #EE3F44;border: 1px solid #EE3F44;margin-top: -34px;margin-left: 207px;font-size: 12px;margin-bottom: 10px;
+" ng-if="user.cardnumber && order.discount_dooly_price && order.from_dooly == 'true'">&nbsp&nbsp立省{{order.discount_dooly_price}}元</div>
         </div>
 
         <!-- Info -->
