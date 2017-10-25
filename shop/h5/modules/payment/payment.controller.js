@@ -82,6 +82,7 @@
 			}
 			case 'doolypay.wap':
 			{
+				console.log(PaymentModel.order.id);
                 $state.go('doolypay', {
                     order: PaymentModel.order.id
                 });

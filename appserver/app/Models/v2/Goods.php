@@ -558,7 +558,11 @@ class Goods extends BaseModel
             }
         }
         //返回商品最终购买价格
-        if($goods['dooly_price'] > 0){
+        //如果是兜礼会员下单给订单加上from_dooly标识 by xiaoq 2017-10-25
+        $user_id = Token::authorization();
+        $userInfo = Member::where("user_id", $user_id)->first();
+        $cardnumber = $userInfo['cardnumber'] ? $userInfo['cardnumber']: '';
+        if($goods['dooly_price'] > 0 && !empty($cardnumber)){
             return $goods['dooly_price'];
         }
         return $final_price;
@@ -815,7 +819,12 @@ class Goods extends BaseModel
             'pay_status'      => Order::PS_UNPAYED,
             'agency_id'       => 0 ,//办事处的id
             );
-
+        //如果是兜礼会员下单给订单加上from_dooly标识 by xiaoq 2017-10-24
+        $userInfo = Member::where("user_id", $user_id)->first();
+        $cardnumber = $userInfo['cardnumber'] ? $userInfo['cardnumber']: '';
+        if(!empty($cardnumber)){
+            $order['from_dooly'] = 'true';
+        }
         /* 扩展信息 */
             $order['extension_code'] = '';
             $order['extension_id'] = 0;

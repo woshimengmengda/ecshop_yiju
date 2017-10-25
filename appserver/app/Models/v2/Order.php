@@ -1376,4 +1376,27 @@ class Order extends BaseModel {
 
         return false;
     }
+    /**
+     * 根据ID获取订单详情
+     */
+    public static function getInfoById($params){
+        $uid = Token::authorization();
+        $model = self::where("order_id", $params['order'])->with('goods')->get();
+        $data = $model->toArray();
+        $data['user_id'] = $uid;
+        $orderInfoObj = OrderInfo::where("order_id", $params['order'])->first();
+        $orderInfo = $orderInfoObj->toArray();
+        $userInfo = Member::where("user_id", $uid)->first();
+        $data['cardnumber'] = $userInfo['cardnumber'] ? $userInfo['cardnumber']: '';
+        foreach($data[0]['goods'] as $kk => &$vv){
+            $goodsInfo = OrderGoods::where(["goods_id"=>$vv['id'], "order_id"=>$params['order']])->first();
+            $vv['goods_id'] = $goodsInfo['goods_id'];
+            $vv['goods_name'] = $goodsInfo['goods_name'];
+            $vv['goods_sn'] = $goodsInfo['goods_sn'];
+            $vv['goods_number'] = $goodsInfo['goods_number'];
+            $vv['goods_price'] = $goodsInfo['goods_price'];
+        }
+        $data['order_info'] = $orderInfo;
+        return $data;
+    }
 }

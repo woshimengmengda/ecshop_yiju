@@ -204,4 +204,98 @@ class OrderController extends Controller
     {
         return $this->json(Order::subtotal());
     }
+    /**
+     * POST /ecapi.payment.getcode
+     */
+    public function getCode()
+    {
+        $rules = [
+            'order' => 'required|string',
+            'code' => 'required|string|in:doolypay.wap'
+        ];
+        if($error = $this->validateInput($rules)){
+            return $error;
+        }
+//        $params = $this->validated;
+//        var_dump($params);exit;
+        $data = Order::getInfoById($this->validated);
+//        var_dump($data);exit;
+        foreach($data[0]['goods'] as $r => $d){
+            $o_detail[$r]['code'] = $d['goods_sn'];
+            $o_detail[$r]['amount'] = $d['goods_price'];
+            $o_detail[$r]['category'] = '0000';
+            $o_detail[$r]['price'] = $d['goods_price'];
+            $o_detail[$r]['tax'] = '0';
+            $o_detail[$r]['goods'] = $d['goods_name'];
+            $o_detail[$r]['number'] = $d['goods_number'];
+        }
+        $d_order = array(
+            "amount" => $data['order_info']['order_amount'],
+            "price" => $data['order_info']['order_amount'],
+            "orderDetail"=>$o_detail,
+            "orderDate" => date("Y-m-d H:i:s", time()),
+            "orderNumber" => $data['order_info']['order_sn'],
+            "serialNumber" => $data['order_info']['order_id'],
+        );
+        $d_order['cardNumber'] = $data['cardnumber']?$data['cardnumber']:'';
+
+        //调用兜礼接口
+        $res = $this->curl("makePayVerificationCode", $d_order);
+//        $res['code'] = '0';
+        return $this->json($res);
+    }
+    /**
+     * POST /ecapi.payment.doolyPay
+     */
+    public function doolyPay()
+    {
+        $rules = [
+            'order' => 'required|string',
+            'doolyCode' => 'required|string',
+            'payPassword' => 'string',
+        ];
+        if($error = $this->validateInput($rules)){
+            return $error;
+        }
+        $params = $this->request->all();
+        $data = Order::getInfoById($this->validated);
+
+        foreach($data[0]['goods'] as $r => $d){
+            $o_detail[$r]['code'] = $d['goods_sn'];
+            $o_detail[$r]['amount'] = $d['goods_price'];
+            $o_detail[$r]['category'] = '0000';
+            $o_detail[$r]['price'] = $d['goods_price'];
+            $o_detail[$r]['tax'] = '0';
+            $o_detail[$r]['goods'] = $d['goods_name'];
+            $o_detail[$r]['number'] = $d['goods_number'];
+        }
+
+        $d_order = array(
+            "amount" => $data['order_info']['order_amount'],
+            "verificationCode" => $params['doolyCode'] ? $params['doolyCode'] : '',
+            "orderNumber" => $data['order_info']['order_sn'],
+            "serialNumber" => $data['order_info']['order_id'],
+            "orderDate" => date("Y-m-d H:i:s", time()),
+            "payPassword" => $params['doolyPassWord']?$params['doolyPassWord']:'0',
+            "productDetail" => $o_detail,
+        );
+
+        $d_order['cardNumber'] = $data['cardnumber']?$data['cardnumber']:'';
+
+        //调用兜礼接口
+
+        $res = $this->curl("checkIntegralConsumption", $d_order);
+        //支付成功 更新订单状态 by xiaoq 2017-10-25
+//        $res['code'] = '0';
+        if($res['code'] == '0'){
+            $code = array(
+                'pay_name' => 'doolypay',
+                'order_sn' => $data['order_info']['order_sn'],
+            );
+            Payment::notify($code);
+        }
+        return $this->json($res);
+    }
+
+
 }

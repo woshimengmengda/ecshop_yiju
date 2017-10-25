@@ -159,6 +159,10 @@ $app->group(['prefix' => 'v2', 'namespace' => 'App\Http\Controllers\v2', 'middle
 
     $app->post('ecapi.payment.types.list', 'OrderController@paymentList');
 
+    $app->post('ecapi.payment.getcode', 'OrderController@getCode');
+
+    $app->post('ecapi.payment.doolypay', 'OrderController@doolypay');
+
     $app->post('ecapi.payment.pay', 'OrderController@pay');
 
     $app->post('ecapi.shipping.vendor.list', 'ShippingController@index');

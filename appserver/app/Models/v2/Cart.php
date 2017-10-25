@@ -337,7 +337,12 @@ class Cart extends BaseModel
             'pay_status'      => Order::PS_UNPAYED,
             'agency_id'       => 0 ,//办事处的id
             );
-
+        //如果是兜礼会员下单给订单加上from_dooly标识 by xiaoq 2017-10-24
+        $userInfo = Member::where("user_id", $user_id)->first();
+        $cardnumber = $userInfo['cardnumber'] ? $userInfo['cardnumber']: '';
+        if(!empty($cardnumber)){
+            $order['from_dooly'] = 'true';
+        }
         /* 扩展信息 */
             $order['extension_code'] = '';
             $order['extension_id'] = 0;

@@ -6,19 +6,43 @@
             <div class="button-text">返回</div>
         </div>
         <div class="navbar-title">
-          付款成功
+          兜礼积分支付
         </div>
-        <div class="navbar-right">
+        <div style="margin-top: 45px;
+    text-align: center;
+    background-color: #696B77;
+    line-height: 50px;
+    color: white;
+    height: 100px;">
+            <p>订单已提交</p>
+            <p style="margin-top: -16px;">请在30分钟内容支付{{paymentModel.order.total | number:'2'}}{{paymentModel.doolycode}}元</p>
+            <div ng-if="paymentModel.doolycode == 'true'">doolycode</div>
+        </div>
+        <div style="    margin-top: 30px;
+    margin-bottom: 15px;
+    width: 84%;
+    background-color: #DDDDDD;
+    margin-left: 4%;
+    padding: 4%;
+    border-radius: 4px;">
+            <p style="font-weight: bold;">您需要使用{{paymentModel.order.total | number:'2'}}兜礼积分</p>
+        </div>
+        <input type="text" placeholder="请输入验证码" style="width: 50%;margin-left: 4%;height: 38px;border-radius: 3px;border: 1px solid #ccc;padding: 5px;" ng-model="doolyCode">
+        <input type="button" value="{{paracont}}" ng-disabled="paraevent" style="height: 46px;
+    width: 36%;margin-left: 2%;border: 1px solid #9EC3B1;background-color: white;color: #51A979;border-radius: 2px;font-weight: bold;" ng-click="getDoolyCode()">
+        <input type="password" placeholder="请输入支付密码" style="width: 50%;margin-left: 4%;height: 38px;border-radius: 3px;border: 1px solid #ccc;padding: 5px;" ng-show="isPayPassword" ng-model="doolyPassWord">
+        <div style="margin-top: 20px;width: 92%;background-color: #95DDB5;text-align: center;padding: 10px;margin-left: 4%;border-radius: 2px;color: white;font-size: 18px;height: 44px;box-sizing: border-box;" ng-click="doolyPay()">
+            立即支付
         </div>
     </div>
 
-    <div class="success-info">
-        <img class="info-icon" src="image/logo-payment-success.png"/>
-        <div class="info-text">付款成功，卖家即将为您发货！</div>
-        <div class="info-button" ng-click="touchDetail()">
-            订单详情
-        </div>
-    </div>
+    <!--<div class="success-info">-->
+        <!--<img class="info-icon" src="image/logo-payment-success.png"/>-->
+        <!--<div class="info-text">付款成功，卖家即将为您发货！</div>-->
+        <!--<div class="info-button" ng-click="touchDetail()">-->
+            <!--订单详情-->
+        <!--</div>-->
+    <!--</div>-->
 
 </div>
 

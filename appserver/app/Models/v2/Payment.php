@@ -505,6 +505,22 @@ class Payment extends BaseModel {
 
     public static function notify($code)
     {
+        //兜礼支付成功通知 by xiaoq 2017-10-25
+        if(is_array($code) && $code['pay_name'] == 'doolypay'){
+            $order_no = $code['order_sn'];
+            /* 修改订单状态 */
+            $order = Order::findUnpayedBySN($order_no);
+
+            $order->pay_time = time();
+            $order->pay_status = Order::PS_PAYED;
+            $order->pay_name = '兜礼积分支付';
+            $order->from_dooly = 'true';
+            $order->save();
+
+            OrderAction::toCreateOrUpdate($order->order_id, $order->order_status, $order->shipping_status, $order->pay_status, '兜礼积分支付');
+            return true;
+        }
+
         //--------- 天工收银 notify ----------
         if ($code == 'teegon.wap') {
 
