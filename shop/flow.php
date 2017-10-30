@@ -2188,7 +2188,7 @@ elseif($_REQUEST['step'] == 'get_dooly_code'){
     error_log("\n 获取积分验证码接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
 //    die($json->encode($resc));
 //    $resu = $json->decode($resc, true);
-    if($resu['code'] == '0'){
+    if($resc['code'] == '0'){
         $result = array('status' => 'succ', 'msg' => '获取验证码成功');
         if($resu['isPayPassword'] == '1'){
             $result['is_pay_pwd'] = 'true';
@@ -2239,7 +2239,7 @@ elseif($_REQUEST['step'] == 'get_dooly_code'){
     $Reachlife = new Reachlife();
     $resc = $Reachlife->curl('checkIntegralConsumption', $d_order);
     error_log("\n 兜礼积分支付接口{$orderInfo['order_sn']} \n".var_export($resc, 1)."\n", 3, ROOT_PATH."elog.log");
-    $resc['code'] = '0';
+//    $resc['code'] = '0';
 
     if($resc['code'] == '0'){
         //如果是兜礼支付 给订单加上兜礼标识 by xiaoq 2017-10-25

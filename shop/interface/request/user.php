@@ -9,12 +9,40 @@ define('IN_ECS', TRUE);
 require '../../includes/init.php';
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "../reachlife.php");
 $action = $_GET['action'];
+if($action == 'first_sync_user'){
+    set_time_limit(0);
+    $param['modifyDateTime'] = "0000-00-00 00:00:00";
+    $page = 1;
+    do{
+        $param['page'] = $page;
+        $result = page_sync_user($param);
+        //同步成功返回数据
+        if($result['code'] == '0'){
+            foreach ((array)$result['DateDetail'] as $mk => $mv){
+                $username = $mv['telephone'];
+                $cardNumber = $mv['cardNumber'];
+                if(empty($username) || empty($cardNumber) || $mv['type'] == '3') continue;
+                $regtime = strtotime($mv['activeDate']);
+                $sql = "INSERT INTO " . $GLOBALS['ecs']->table('users').
+                    "(user_name, reg_time, cardnumber)".
+                    " VALUES('$username', '$regtime','$cardNumber')";
+                $res = $GLOBALS['db']->query($sql);
+                //更新新增会员卡号
+                if($res){
+                        error_log("会员同步接口{$mv['telephone']}新增会员成功 \n", 3, ROOT_PATH."sync_user.log");
 
-if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
-//    $username = '12228883333';
+                }
+            }
+
+        }
+        $page++;
+    }while($page<=$result['TotalPage']);
+}elseif($action == 'page_sync_user'){#会员同步接口 定时任务去跑
+//    $username = '18855996633';
 //    $password = '123456';
 //    $email = '';
 //    $res = $GLOBALS['user']->add_user($username, $password, $email);
+//    var_dump(get_class($GLOBALS['user']));exit;
 //    var_dump($res);exit;
 //    $params = array(
 //      'user_id' => '7',
@@ -27,16 +55,23 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
 //    $user = get_user_by_cardnumber('46694100211');
 //    echo "<pre>";
 //    print_r($user);exit;
+//    $param['modifyDateTime'] = date("Y-m-d H:i:s", time()-180);
+    set_time_limit(0);
     $param['modifyDateTime'] = date("Y-m-d H:i:s", time()-180);
     $page = 1;
 //    $TotalPage = 5;
     do{
         $param['page'] = $page;
-        $res = page_sync_user($param);
-
-//    $result = json_decode($res, true);
+        $result = page_sync_user($param);
+//        $txtName = $page.'.txt';
+//        $dayUserFile = fopen($txtName, "a");
+//        $res_write = fwrite($dayUserFile, $res);
+//    var_dump($str);exit;
+//        fclose($dayUserFile);
+//        $result = json_decode($res, true);
         //同步成功返回数据
-        if($res['code'] == '0'){
+        if($result['code'] == '0'){
+
             foreach ((array)$result['DateDetail'] as $mk => $mv){
                 switch ($mv['type']){
                     //离职员工 删除
@@ -52,43 +87,48 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
                     case '1':
                     case '2':
                         $user = get_user_by_cardnumber($mv['cardNumber']);
+
                         //存在但是手机号不相同则更新手机号
                         if(!empty($user)){
                             if($user['user_name'] != $mv['telephone']){
                                 $params['user_id'] = $user['user_id'];
                                 $params['mobile'] = $mv['telephone'];
                                 if(update_user_name($params)){
-                                    echo "存在相同卡号会员，手机号不同，更新手机号成功";
+                                    error_log("\n 会员同步接口{$mv['telephone']}更新手机号成功 \n", 3, ROOT_PATH."sync_user.log");
                                 }else{
-                                    echo "存在相同卡号会员，手机号不同，更新手机号失败";
+                                    error_log("\n 会员同步接口{$mv['telephone']}更新手机号失败 \n", 3, ROOT_PATH."sync_user.log");
                                 }
                             }
                         }else{//不存在则添加
                             $user = get_user_by_mobile($mv['telephone']);
+
                             if(!empty($user)){
                                 $params['cardnumber'] = $mv['cardNumber'];
                                 $params['user_name'] = $mv['telephone'];
                                 if(update_user_cardnumber($params)){
-                                    echo "新增会员成功，更新会员卡号成功";
+                                    error_log("\n 会员同步接口{$mv['telephone']}更新会员卡号成功 \n", 3, ROOT_PATH."sync_user.log");
                                 }else{
-                                    echo "新增会员成功，更新会员卡号失败";
+                                    error_log("\n 会员同步接口{$mv['telephone']}更新会员卡号失败 \n", 3, ROOT_PATH."sync_user.log");
                                 }
                             }else{
                                 $username = $mv['telephone'];
-                                $password = $mv['cardNumber'];
-                                $email = '';
-                                $res = $GLOBALS['user']->add_user($username, $password, $email);
+                                $cardNumber = $mv['cardNumber'];
+                                $regtime = strtotime($mv['activeDate']);
+                                $sql = "INSERT INTO " . $GLOBALS['ecs']->table('users').
+                                    "(user_name, reg_time, cardnumber)".
+                                    " VALUES('$username', '$regtime','$cardNumber')";
+                                $res = $GLOBALS['db']->query($sql);
                                 //更新新增会员卡号
                                 if($res){
                                     $params['cardnumber'] = $mv['cardNumber'];
                                     $params['user_name'] = $mv['telephone'];
                                     if(update_user_cardnumber($params)){
-                                        echo "新增会员成功，更新会员卡号成功";
+                                        error_log("\n 会员同步接口{$mv['telephone']}新增会员成功 \n", 3, ROOT_PATH."sync_user.log");
                                     }else{
-                                        echo "新增会员成功，更新会员卡号失败";
+                                        error_log("\n 会员同步接口{$mv['telephone']}新增会员成功 \n", 3, ROOT_PATH."sync_user.log");
                                     }
                                 }else{
-                                    echo "新增会员失败";
+                                    error_log("\n 会员同步接口{$mv['telephone']}新增会员失败 \n", 3, ROOT_PATH."sync_user.log");
                                 }
                             }
                         }
@@ -98,13 +138,15 @@ if($action == 'page_sync_user'){#会员同步接口 定时任务去跑
 
         }
         $page++;
-    }while($page<=$res['TotalPage']);
+        error_log("\n ===会员同步接口第{$page}页=== \n", 3, ROOT_PATH."sync_user.log");
+//        sleep(10);
+    }while($page<=$result['TotalPage']);
 
 //    error_log("\n 兜礼会员同步接口params \n".var_export($param, 1)."\n 结果res \n".var_export($res, 1)."\n", 3, ROOT_PATH."elog.log");
 }
 elseif($action == 'dooly_login'){
     //兜礼一号通登录接口 by xiaoq 2017-10-22
-    $shopId = 'shopId';
+    $shopId = 'TEST_wf1a888b58yiju';
     $shopKey = 'shopKey';
     $getParams = $_GET;
     $now_time = time();

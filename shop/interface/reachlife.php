@@ -1,17 +1,20 @@
 <?php
 class Reachlife {
     //商家唯一编号
-    private $businessId = 'TEST_e4d64e2629c7c7e34a9fd1b52exiuge';
+    private $businessId = 'TEST_wf1a888b58yiju';
     //商家门店或设备编号
     private $storesId = 'A001';
     //RESTURL
-    private $restUrl = "https://pay.reach-life.com:8443/api/services/rest/";
+    private $restUrl = "https://pay.reach-life.com:8448/api/services/rest/";
     //证书 生成方式 openssl pkcs12 -in exiuge.p12 -out exiuge.crt.pem -clcerts -nokeys
-    private $sslCrt = "exiuge.crt.pem";
+//    private $sslCrt = "exiuge.crt.pem";
+    private $sslCrt = "yiju.crt.pem";
     //私钥 生成方式 openssl pkcs12 -in exiuge.p12 -out exiuge.key.pem -nocerts -nodes
-    private $sslKey = "exiuge.key.pem";
+//    private $sslKey = "exiuge.key.pem";
+    private $sslKey = "yiju.key.pem";
     //证书私钥用密码
-    private $sslPassword = "qweasdzxc123456";
+//    private $sslPassword = "qweasdzxc123456";
+//    private $sslPassword = "";
 
     //调用接口的Curl方法
     /**
@@ -28,6 +31,7 @@ class Reachlife {
             $param["storesId"] = $this->storesId;
             //echo json_encode($param)  . "\r";;
             $ch = curl_init($url);
+//            var_dump($param);exit;
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_FAILONERROR, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($param));
@@ -38,14 +42,18 @@ class Reachlife {
             curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
             //证书和私钥放在类文件同目录
             curl_setopt($ch, CURLOPT_SSLCERT, dirname(__FILE__) . DIRECTORY_SEPARATOR . $this->sslCrt);
+//            var_dump(file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . $this->sslCrt));
             curl_setopt($ch, CURLOPT_SSLKEY, dirname(__FILE__) . DIRECTORY_SEPARATOR . $this->sslKey);
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $this->sslPassword);
-            curl_setopt($ch, CURLOPT_SSLKEYPASSWD, $this->sslPassword);
+//            var_dump(file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . $this->sslKey));
+//            var_dump(curl_exec($ch));exit;
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $this->sslPassword);
+//            curl_setopt($ch, CURLOPT_SSLKEYPASSWD, $this->sslPassword);
             if(!$response = curl_exec($ch)) {
                 $response = array(
                     "code" => curl_errno($ch),
                     "info" => curl_error($ch)
                 );
+                return $response;
             }
             curl_close($ch);
         } catch(Exception $e) {
@@ -54,8 +62,9 @@ class Reachlife {
                 "code" => $e->getCode(),
                 "info" => $e->getMessage()
             );
+            return $response;
         }
-        return $response;
+        return json_decode($response, true);
     }
 }
 ?>
